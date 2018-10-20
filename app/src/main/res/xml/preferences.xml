@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:key="@string/key_notificacoes"
+        android:title="Notificações"
+        android:summary="Click para habilitar ou desabilitar"
+        android:defaultValue="false"/>
+    <SwitchPreference
+        android:key="@string/key_localizacao_gps"
+        android:title="Localização GPS"
+        android:summary="Click para habilitar ou desabilitar"
+        android:defaultValue="false"/>
+</PreferenceScreen>

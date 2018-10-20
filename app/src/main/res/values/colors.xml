@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#18B6FD</color>
+    <color name="colorPrimaryDark">#18aaff</color>
+    <color name="colorAccent">#93cef1</color>
+
+    <color name="colorPrimary0">#3F51B5</color>
+    <color name="colorPrimaryDark0">#303F9F</color>
+    <color name="colorAccent0">#FF4081</color>
+
+    <color name="colorPrimary3">#3F51B5</color>
+    <color name="colorPrimaryDark3">#303F9F</color>
+    <color name="colorAccent3">#FF4081</color>
+
+    <color name="bottom_drawer">#18B6FD</color>
+
+    <color name="favorito_verde">#44bd32</color>
+
+    <color name="color_1">#ffa600</color>
+    <color name="vermelho">#e74c3c</color>
+    <color name="color_3">#970197</color>
+
+    <color name="color_cadastrar1">#0a091b</color>
+    <color name="color_cadastrar2">#070716</color>
+
+    <color name="rippleEffectColor">#f816a463</color>
+    <color name="buttonLogar">#1fbad6</color>
+    <color name="buttonCadastrar">#83838c</color>
+
+    <color name="black_overlay">#66000000</color>
+    <color name="branco">#ffff</color>
+
+    <color name="azulClaro">#beeaf2</color>
+    <color name="cinza">#808080</color>
+    <color name="cinzaClaro">#C3C3C3</color>
+    <color name="cinzaDisable">#aeaaaa</color>
+    <color name="verde">#42A54A</color>
+    <color name="azul">#18aaff</color>
+</resources>
