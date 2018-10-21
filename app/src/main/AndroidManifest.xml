@@ -39,6 +39,7 @@
         <activity
             android:name=".ui.activity.PesquisarActivity"
             android:label="@string/pesquisar"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".ui.activity.FavoritosActivity"

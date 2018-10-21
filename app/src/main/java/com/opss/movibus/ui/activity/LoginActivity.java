@@ -3,12 +3,14 @@ package com.opss.movibus.ui.activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -144,7 +146,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     FirebaseUser user = Firebase.get().getFireUsuario().getFireAuth().getCurrentUser();
-
                     //Verificando se já existe uma conta da google cadastrada
                     Firebase.get().getFireUsuario().getCollection().document(user.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
@@ -191,18 +192,48 @@ public class LoginActivity extends AppCompatActivity {
         Firebase.get().getFireUsuario().getCollection().document(usuario.getId()).set(usuario).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
+                dialog.dismiss();
                 Snackbar.make(getCurrentFocus(), "Usuário cadastrado com sucesso!", Snackbar.LENGTH_LONG).show();
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 intent.putExtra("USUARIO_LOGADO", usuario);
                 startActivity(intent);
-                dialog.dismiss();
                 finish();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Snackbar.make(getCurrentFocus(), "Erro " + e.getMessage(), Snackbar.LENGTH_LONG).show();
                 dialog.dismiss();
+                Snackbar.make(getCurrentFocus(), "Erro " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void recuperarSenha() {
+        //Verificando se o Email esta vazio
+        if (TextUtils.isEmpty(viewHolder.emailText.getText().toString())) {
+            Snackbar.make(getCurrentFocus(), "Informe o email", Snackbar.LENGTH_SHORT).show();
+            viewHolder.emailText.requestFocus();
+            return;
+        }
+
+        String email = viewHolder.emailText.getText().toString();
+
+        SpotsDialog dialog = new SpotsDialog(LoginActivity.this);
+        dialog.show();
+
+        Firebase.get().getFireUsuario().getFireAuth().sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    dialog.dismiss();
+                    Snackbar.make(getCurrentFocus(), "E-mail de verificação enviado com sucesso!", Snackbar.LENGTH_LONG).show();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                dialog.dismiss();
+                Snackbar.make(getCurrentFocus(), "Erro, ao enviar e-mail!", Snackbar.LENGTH_LONG).show();
             }
         });
     }
@@ -221,20 +252,15 @@ public class LoginActivity extends AppCompatActivity {
             senhaText = findViewById(R.id.senha_text);
             recuperarSenha = findViewById(R.id.recuperar_senha);
 
-            recuperarSenha.setVisibility(View.GONE);
-
             btnCadastrar = findViewById(R.id.btn_cadastrar);
             btnLogar = findViewById(R.id.btn_logar);
-            googleButton = findViewById(R.id.googleButton);
+            googleButton = findViewById(R.id.btn_google_sign);
 
-            //btnLogar.setOnClickListener((OnClickListener) -> logar());
+            btnLogar.requestFocus();
+
             googleButton.setOnClickListener((OnClickListener) -> signInGoogle());
-            btnCadastrar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(LoginActivity.this, CadastroActivity.class));
-                }
-            });
+            btnCadastrar.setOnClickListener((OnClickListener) -> startActivity(new Intent(LoginActivity.this, CadastroActivity.class)));
+            recuperarSenha.setOnClickListener((OnClickListener) -> recuperarSenha() );
         }
 
     }

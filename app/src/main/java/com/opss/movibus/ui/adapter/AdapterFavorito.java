@@ -51,7 +51,8 @@ public class AdapterFavorito extends Adapter<Favorito> implements ItemTouchHelpe
             viewHolder.textDescricao.setText(favorito.getDescricao());
             viewHolder.textOrigem.setText(favorito.getOrigem());
             viewHolder.textDestino.setText(favorito.getDestino());
-            viewHolder.textQuantidadeOnibus.setText(String.valueOf(favorito.getOnibusOnline()));
+            //viewHolder.textQuantidadeOnibus.setText(String.valueOf(favorito.getOnibusOnline()));
+            viewHolder.textQuantidadeOnibus.setText(String.valueOf(favorito.getLinha().linha.getOnibusMap().size()));
 
         } else if (favorito.getPonto() != null) {
 

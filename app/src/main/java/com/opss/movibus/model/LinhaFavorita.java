@@ -17,6 +17,9 @@ public class LinhaFavorita implements Serializable {
     private String destino;
 
     @Exclude
+    public Linha linha;
+
+    @Exclude
     private int onibusOnline = 0;
 
     public LinhaFavorita() {

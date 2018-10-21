@@ -15,12 +15,14 @@ public class PontoFavorito implements Serializable {
     private boolean coberto;
 
     public PontoFavorito() {
+        this.id = "";
         this.idPonto = "";
         this.descricao = "";
         this.coberto = false;
     }
 
     public PontoFavorito(PontoOnibus pontoOnibus) {
+        this();
         this.idPonto = pontoOnibus.getId();
         this.coberto = pontoOnibus.isCoberto();
         this.descricao = pontoOnibus.getDescricao();

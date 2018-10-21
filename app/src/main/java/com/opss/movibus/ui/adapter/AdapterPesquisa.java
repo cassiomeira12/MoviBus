@@ -56,9 +56,10 @@ public class AdapterPesquisa extends Adapter<Object> {
             viewHolder.linearLinha.setVisibility(View.VISIBLE);
 
             viewHolder.imageIcone.setImageResource(R.mipmap.ic_onibus);
-            viewHolder.textDescricao.setText(linha.getNome() + " VIA " + linha.getVia());
+            viewHolder.textDescricao.setText(linha.getNome() + linha.getVia());
             viewHolder.textOrigem.setText(linha.getOrigem());
             viewHolder.textDestino.setText(linha.getDestino());
+            viewHolder.textQuantidadeOnibus.setText(String.valueOf(linha.getOnibusMap().size()));
 
         } else {//itinerário
 

@@ -9,12 +9,16 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -32,10 +36,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.opss.movibus.R;
 import com.opss.movibus.firebase.Firebase;
 import com.opss.movibus.location.camera.Acompanhar;
 import com.opss.movibus.location.camera.NaoAcompanhar;
@@ -46,7 +52,6 @@ import com.opss.movibus.model.PontoFavorito;
 import com.opss.movibus.model.PontoOnibus;
 import com.opss.movibus.ui.activity.BottomDrawer;
 import com.opss.movibus.ui.activity.MainActivity;
-import com.opss.movibus.ui.fragment.marker.MarkerObjetct;
 import com.opss.movibus.ui.fragment.marker.OnibusMarker;
 import com.opss.movibus.ui.fragment.marker.PontoMarker;
 import com.opss.movibus.util.PermissoesUtils;
@@ -74,17 +79,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
     private LatLng centroConquista = new LatLng(-14.86, -40.839);
 
-    private Map<String, Object> onibusMap;
-    private Map<String, Object> pontoOnibusMap;
-    private Map<String, Map<String, Object>> markerMap;
-
-    private Map<String, Map<String, Object>> lista;
-
-    //Firebase
-    private FirebaseFirestore dataBase = FirebaseFirestore.getInstance();
-    private CollectionReference onibusCollections;
-    private GeoFire geoFire;
-
+    public static CollectionFirebase COLLECTIONS;
     private OnibusMarker onibusAcompanhando = null;
 
     @Override
@@ -93,16 +88,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         getMapAsync(this);
 
         this.activity = (MainActivity) getActivity();
-        //this.appDrawer = activity.vh.appDrawer;
         this.appDrawer = MainActivity.appDrawer;
-
-        onibusMap = new HashMap<>();
-        pontoOnibusMap = new HashMap<>();
-        markerMap = new HashMap<>();
-        lista = new HashMap<>();
-
-        markerMap.put("onibus", onibusMap);
-        markerMap.put("ponto", pontoOnibusMap);
 
         locationManager = (LocationManager) activity.getSystemService(LOCATION_SERVICE);
     }
@@ -158,149 +144,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);//Habilitando controle de Zoom
 
-        firebaseConectionsLinha();
-        //firebaseConectionsOnibus();
-        firebaseConectionsPontoOnibus();
-    }
-
-    private void firebaseConectionsLinha() {
-        Firebase.get().getFireLinha().getCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isComplete()) {
-                    for (QueryDocumentSnapshot doc : task.getResult()) {
-                        Linha linha = doc.toObject(Linha.class);
-                        if (linha != null) {
-                            Map<String, Object> onibusMap = new HashMap<>();
-                            lista.put(linha.getId(), onibusMap);
-                        }
-                    }
-                    firebaseConectionsOnibus();
-                }
-            }
-        });
-    }
-
-    private void firebaseConectionsOnibus() {
-
-        Firebase.get().getFireOnibus().getCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isComplete()) {
-                    for (QueryDocumentSnapshot doc : task.getResult()) {
-                        Onibus onibus = doc.toObject(Onibus.class);
-
-                        OnibusMarker onibusMarker = new OnibusMarker(onibus);//Criando Marker do Onibus
-                        onibusMarker.setDocumentReference(doc.getReference());//Adicionando Referencia do Documento
-                        onibusMarker.getMarker(mMap);//Adicionando Marker no Google Maps
-                        onibusMarker.getMarker().setTag(onibus);//Adicionando o Onibus como Tag no Marker
-
-                        onibus.setMarker(onibusMarker);//Adicionando o marker ao Objeto Onibus
-                        onibus.atualizarLinha();//Recebendo o Objeto Linha no Onibus
-
-                        LinhaFavorita linhaFavoritada = MainActivity.LINHAS_FAVORITAS.get(onibus.getIdLinha());
-                        if (linhaFavoritada != null) {
-                            linhaFavoritada.addOnibusOnline();
-                        }
-
-                        lista.get(onibus.getIdLinha()).put(onibus.getId(), onibusMarker);
-                        onibusMap.put(doc.getId(), onibusMarker);
-                    }
-                }
-            }
-        });
-
-//        dataBase.collection(Onibus.COLECAO).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                if (task.isComplete()) {
-//                    for (QueryDocumentSnapshot doc : task.getResult()) {
-//                        Onibus onibus = doc.toObject(Onibus.class);
-//
-//                        OnibusMarker onibusMarker = new OnibusMarker(onibus);
-//                        onibusMarker.setDocumentReference(doc.getReference());
-//                        onibusMarker.getMarker(mMap);
-//                        //onibusMarker.marker.setTag(onibus);
-//                        onibusMarker.getMarker().setTag(onibus);
-//
-//                        onibus.setMarker(onibusMarker);
-//
-//                        onibus.getIdLinha();
-//
-//                        LinhaFavorita l = MainActivity.LINHAS_FAVORITAS.get(onibus.getIdLinha());
-//                        if (l != null) {
-//                            l.addOnibusOnline();
-//                        }
-//
-//                        onibus.atualizarLinha();
-//
-//                        onibusMap.put(doc.getId(), onibusMarker);
-//                    }
-//                }
-//            }
-//        });
-
-    }
-
-    private void firebaseConectionsPontoOnibus() {
-
-//        LatLng l1 = new LatLng(-14.887643, -40.802569);
-//        LatLng l2 = new LatLng(-14.888117, -40.802987);
-//        LatLng l3 = new LatLng(-14.888425, -40.803313);
-//        LatLng l4 = new LatLng(-14.889932, -40.804553);
-//        LatLng l5 = new LatLng(-14.891238, -40.805761);
-//
-//        List<LatLng> l = new ArrayList<>();
-//        l.add(l1);
-//        l.add(l2);
-//        l.add(l3);
-//        l.add(l4);
-//        l.add(l5);
-//
-//        Rota rota = new Rota();
-//        rota.setId(Firebase.get().getFireRota().generateKey());
-//        rota.setCoordenadas(l);
-
-        Firebase.get().getFirePontoOnibus().getCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isComplete()) {
-                    for (QueryDocumentSnapshot doc : task.getResult()) {
-                        PontoOnibus ponto = doc.toObject(PontoOnibus.class);
-
-                        PontoMarker pontoMarker = new PontoMarker(ponto);
-                        pontoMarker.getMarker(mMap);
-                        pontoMarker.getMarker().setTag(ponto);
-
-                        ponto.setMarker(pontoMarker);
-
-                        pontoOnibusMap.put(ponto.getId(), pontoMarker);
-                    }
-                }
-            }
-        });
-
-//        dataBase.collection(PontoOnibus.COLECAO).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                if (task.isComplete()) {
-//                    for (QueryDocumentSnapshot doc : task.getResult()) {
-//                        PontoOnibus ponto = doc.toObject(PontoOnibus.class);
-//                        PontoMarker pontoMarker = new PontoMarker(ponto);
-//                        pontoMarker.getMarker(mMap);
-//                        pontoMarker.getMarker().setTag(ponto);
-//
-//                        ponto.setMarker(pontoMarker);
-//
-//                        //rota.addPonto(ponto);
-//                        pontoOnibusMap.put(ponto.getId(), pontoMarker);
-//                    }
-//
-//                    //Firebase.get().getFireRota().setDocument(rota);
-//                }
-//            }
-//        });
-
+        COLLECTIONS = new CollectionFirebase();
     }
 
     @SuppressLint("MissingPermission")
@@ -320,45 +164,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
     }
 
-    private void teste() {
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            Toast.makeText(activity, "Sim", Toast.LENGTH_SHORT).show();
-
-        } else {
-            Toast.makeText(activity, "Nao", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void buildAlertMessageNoGPS() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setMessage("O GPS está desativado, deseja ativá-lo?")
-                .setCancelable(true)
-                .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                })
-                .setNegativeButton("Não", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                });
-        final AlertDialog alert = builder.create();
-        alert.show();
-    }
-
-    private boolean resquestLocationPermission() {
-        boolean fineLocation = ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        boolean coarseLocation = ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-        return  fineLocation && coarseLocation;
-        //return ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-    }
-
     @SuppressLint("MissingPermission")
     private void locationManager2() {
         //Localizacao via GPS
@@ -368,44 +173,8 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             mLastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            Toast.makeText(activity, "GPS Provider", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(activity, "GPS Provider", Toast.LENGTH_SHORT).show();
             return;
-        }
-
-//        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-//            mLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-//            Toast.makeText(activity, "Network Provider", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private void locationManager() {
-        //locationManager = (LocationManager) activity.getSystemService(LOCATION_SERVICE);
-
-        //Localizacao via GPS
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        //Localizacao via INTERNET
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-
-            Location lat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (lat != null) {
-                mLastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                moveCamera(lat, ZOOM_MAX);
-            }
-
-        } else {
-
-            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                Location lat = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                if (lat != null) {
-                    mLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                    moveCamera(lat, ZOOM_MAX);
-                }
-            }
-
         }
     }
 
@@ -451,24 +220,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
-    public void iniciarLocalizacao() {
-//        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-//            ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//
-//            //boolean s = ((LocationManager) activity.getSystemService(Context.LOCATION_SERVICE)).isProviderEnabled(LocationManager.GPS_PROVIDER);
-//            boolean s = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-//
-//            Log.i("CASSIO", String.valueOf(s));
-//
-//            //Localizacao via GPS
-//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-//            //Localizacao via INTERNET
-//            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-//
-//            mMap.setMyLocationEnabled(true);
-//        }
-    }
-
     public void pararLocalizacaoGPS() {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -487,19 +238,8 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public boolean onMyLocationButtonClick() {
-        //locationManager();
         iniciarLocalizacao2();
         return true;
-    }
-
-    //Muda a visao da Camera para uma coordenada
-    public void moveCamera(LatLng latLng, float zoom) {
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
-    }
-
-    public void moveCamera(Location location, float zoom) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
     @Override
@@ -520,7 +260,9 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        appDrawer.close();
+        if (appDrawer.isVisible()) {
+            appDrawer.close();
+        }
 
         //Market do ONIBUS
         if (marker.getTag() instanceof Onibus) {
@@ -536,8 +278,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
             appDrawer.abrir(onibusSelecionado, marker);
 
-            LinhaFavorita linhaFavorita = MainActivity.LINHAS_FAVORITAS.get(onibusSelecionado.getIdLinha());
-
+            LinhaFavorita linhaFavorita = COLLECTIONS.linhasFavoritas.get(onibusSelecionado.getIdLinha());
             if (linhaFavorita != null) {
                 appDrawer.setFavorito(linhaFavorita);
             }
@@ -553,8 +294,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
             appDrawer.abrir(pontoSelecionado, marker);
 
-            PontoFavorito pontoFavorito = MainActivity.PONTOS_FAVORITOS.get(pontoSelecionado.getId());
-
+            PontoFavorito pontoFavorito = COLLECTIONS.pontosFavoritos.get(pontoSelecionado.getId());
             if (pontoFavorito != null) {
                 appDrawer.setFavorito(pontoFavorito);
             }
@@ -596,6 +336,16 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onProviderDisabled(String s) {
 
+    }
+
+    //Muda a visao da Camera para uma coordenada
+    public void moveCamera(LatLng latLng, float zoom) {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+    }
+
+    public void moveCamera(Location location, float zoom) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
     public void acompanharOnibus(Onibus onibus) {
@@ -668,47 +418,36 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 //        mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.GRAY));
     }
 
-    public void activityResultLinha(String idLinha) {
-
-        for (Object marker : onibusMap.values()) {
-            ((OnibusMarker) marker).getMarker().setVisible(false);
-        }
-
-        Map<String, Object> map = lista.get(idLinha);
-
-        if (map == null) {
-            Snackbar.make(getView(), "Essa linha não possui Ônibus Online", Snackbar.LENGTH_LONG).show();
-            return;
-        }
-
-        if (map.isEmpty()) {
-            Snackbar.make(getView(), "Essa linha não possui Ônibus Online", Snackbar.LENGTH_LONG).show();
-            return;
-        }
-
-        for (Object marker : map.values()) {
-            ((OnibusMarker) marker).getMarker().setVisible(true);
-        }
-
-        Snackbar.make(getView(), "Linha filtrada", Snackbar.LENGTH_LONG).show();
-
+    public void mostrarTodosOsOnibus() {
+//        AsyncTask.execute(new Runnable() {
+//            @Override
+//            public void run() {
+                for (Linha linha : COLLECTIONS.linhasOnibus.values()) {
+                    linha.setOnibusVisible(true);
+                }
+//            }
+//        });
     }
 
-    public void mostrarTodosOsOnibus() {
-        for (Object marker : onibusMap.values()) {
-            ((OnibusMarker) marker).getMarker().setVisible(true);
-        }
+    public void activityResultLinha(String idLinha) {
+//        AsyncTask.execute(new Runnable() {
+//            @Override
+//            public void run() {
+                for (Linha linha : COLLECTIONS.linhasOnibus.values()) {
+                    linha.setOnibusVisible(false);
+                }
+
+                Linha linha = COLLECTIONS.linhasOnibus.get(idLinha);
+                linha.setOnibusVisible(true);
+                Snackbar.make(getView(), "Linha filtrada", Snackbar.LENGTH_LONG).show();
+//            }
+//        });
     }
 
     public void activityResultPontoOnibus(String idPonto) {
-        PontoMarker marker = (PontoMarker) pontoOnibusMap.get(idPonto);
-
-        if (marker == null) {
-            return;
-        }
-
-        marker.getMarker().showInfoWindow();
-        moveCamera(marker.getMarker().getPosition(), ZOOM_SELECT);
+        PontoOnibus ponto = COLLECTIONS.pontoOnibus.get(idPonto);
+        ponto.getMarker().getMarker().showInfoWindow();
+        moveCamera(ponto.getMarker().getMarker().getPosition(), ZOOM_SELECT);
     }
 
     private void pontosDeOnibus() {
@@ -724,8 +463,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 //        adicionarPontoMapa(l3);
 //        adicionarPontoMapa(l4);
 //        adicionarPontoMapa(l5);
-
-
     }
 
     private void adicionarOnibusMapa(LatLng latLng) {
@@ -748,17 +485,17 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 //        ponto.setLatitude(latLng.latitude);
 //        ponto.setLongitude(latLng.longitude);
 
-        String id = dataBase.collection(PontoOnibus.COLECAO).document().getId();
-
-        PontoOnibus ponto = new PontoOnibus();
-        ponto.setId(id);
-        ponto.setPosicao(latLng.latitude, latLng.longitude);
-
-        PontoMarker pontoMarker = new PontoMarker(ponto);
-        Marker marker = pontoMarker.getMarker(mMap);
-        marker.setTag(ponto);
-
-        dataBase.collection(PontoOnibus.COLECAO).document(id).set(ponto);
+//        String id = dataBase.collection(PontoOnibus.COLECAO).document().getId();
+//
+//        PontoOnibus ponto = new PontoOnibus();
+//        ponto.setId(id);
+//        ponto.setPosicao(latLng.latitude, latLng.longitude);
+//
+//        PontoMarker pontoMarker = new PontoMarker(ponto);
+//        Marker marker = pontoMarker.getMarker(mMap);
+//        marker.setTag(ponto);
+//
+//        dataBase.collection(PontoOnibus.COLECAO).document(id).set(ponto);
     }
 
     private void adicionarLinha() {
@@ -774,6 +511,164 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         linha.setIdRotaVolta("haeZjzAyDUzsdt08Wex0");
 
         Firebase.get().getFireLinha().setDocument(linha);
+    }
+
+    public class CollectionFirebase implements Serializable {
+
+        public Map<String, LinhaFavorita> linhasFavoritas;
+        public Map<String, PontoFavorito> pontosFavoritos;
+
+        public Map<String, Linha> linhasOnibus;
+        public Map<String, PontoOnibus> pontoOnibus;
+
+        private ProgressBar progressBar;
+
+        public CollectionFirebase() {
+            linhasFavoritas = new HashMap<>();
+            pontosFavoritos = new HashMap<>();
+
+            linhasOnibus = new HashMap<>();
+            pontoOnibus = new HashMap<>();
+
+            progressBar = activity.findViewById(R.id.progress);
+
+            //getLinhaFavoritaCollections();
+            getPontoFavoritoCollections();
+            getLinhaOnibusCollections();
+            getPontoOnibusCollections();
+        }
+
+        private void getLinhaFavoritaCollections() {
+            Firebase.get().getFireUsuario().getUserDocument().collection(LinhaFavorita.COLECAO).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isComplete()) {
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            LinhaFavorita linha = doc.toObject(LinhaFavorita.class);
+                            linha.linha = linhasOnibus.get(linha.getIdLinha());
+                            linhasFavoritas.put(linha.getIdLinha(), linha);
+                        }
+                        getOnibusCollections();
+                    }
+                }
+            });
+        }
+
+        private void getPontoFavoritoCollections() {
+            Firebase.get().getFireUsuario().getUserDocument().collection(PontoFavorito.COLECAO).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isComplete()) {
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            PontoFavorito ponto = doc.toObject(PontoFavorito.class);
+                            pontosFavoritos.put(ponto.getIdPonto(), ponto);
+                        }
+                    }
+                }
+            });
+        }
+
+        private void getLinhaOnibusCollections() {
+            Firebase.get().getFireLinha().getCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isComplete()) {
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            Linha linha = doc.toObject(Linha.class);
+                            linhasOnibus.put(linha.getId(), linha);
+                        }
+                        getLinhaFavoritaCollections();
+                        //getOnibusCollections();
+                    }
+                }
+            });
+        }
+
+        private void getOnibusCollections() {
+            Firebase.get().getFireOnibus().getCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isComplete()) {
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            Onibus onibus = doc.toObject(Onibus.class);
+
+                            Linha linha = linhasOnibus.get(onibus.getIdLinha());
+                            if (linha != null) {
+                                linha.setOnibus(onibus);
+                                onibus.setLinha(linha);
+                            }
+
+                            LinhaFavorita linhaFavorita  = linhasFavoritas.get(onibus.getIdLinha());
+                            if (linhaFavorita != null) {
+                                linhaFavorita.addOnibusOnline();
+                            }
+
+                            OnibusMarker marker = new OnibusMarker(onibus);//Criando Marker do Onibus
+                            marker.setDocumentReference(doc.getReference());//Adicionando Referencia do Documento
+                            marker.getMarker(mMap);//Adicionando Marker no Google Maps
+                            marker.getMarker().setTag(onibus);//Adicionando o Onibus como Tag no Marker
+
+                            onibus.setMarker(marker);//Adicionando o marker ao Objeto Onibus
+                        }
+                        progressBar.setVisibility(View.GONE);
+                    }
+                }
+            });
+        }
+
+        private void getPontoOnibusCollections() {
+            Firebase.get().getFirePontoOnibus().getCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isComplete()) {
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            PontoOnibus ponto = doc.toObject(PontoOnibus.class);
+
+                            PontoMarker pontoMarker = new PontoMarker(ponto);
+                            pontoMarker.getMarker(mMap);
+                            pontoMarker.getMarker().setTag(ponto);
+
+                            ponto.setMarker(pontoMarker);
+
+                            pontoOnibus.put(ponto.getId(), ponto);
+                        }
+                    }
+                }
+            });
+        }
+
+        public void setFavorito(LinhaFavorita linha) {
+            linhasFavoritas.put(linha.getId(), linha);
+        }
+
+        public void setFavorito(PontoFavorito ponto) {
+            pontosFavoritos.put(ponto.getIdPonto(), ponto);
+        }
+
+        public LinhaFavorita getLinhaFavorita(String id) {
+            return linhasFavoritas.get(id);
+        }
+
+        public PontoFavorito getPontoFavorito(String id) {
+            return pontosFavoritos.get(id);
+        }
+
+        public Linha getLinha(String id) {
+            return linhasOnibus.get(id);
+        }
+
+        public PontoOnibus getPontoOnibus(String id) {
+            return pontoOnibus.get(id);
+        }
+
+        public void removeFavorito(LinhaFavorita linha) {
+            linhasFavoritas.remove(linha.getId());
+        }
+
+        public void removeFavorito(PontoFavorito ponto) {
+            pontosFavoritos.remove(ponto.getId());
+        }
+
     }
 
 }

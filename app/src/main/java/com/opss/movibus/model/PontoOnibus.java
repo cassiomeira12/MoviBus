@@ -79,19 +79,23 @@ public class PontoOnibus implements Serializable {
         this.longitude = longitude;
     }
 
+    @Exclude
     public void setPosicao(double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
+    @Exclude
     public PontoMarker getMarker() {
         return marker;
     }
 
+    @Exclude
     public void setMarker(PontoMarker marker) {
         this.marker = marker;
     }
 
+    @Exclude
     public Map<String, Object> getUpdate() {
         Map<String, Object> update = new HashMap<>();
 

@@ -15,6 +15,7 @@ import com.opss.movibus.model.Linha;
 import com.opss.movibus.model.LinhaFavorita;
 import com.opss.movibus.ui.adapter.Adapter;
 import com.opss.movibus.ui.adapter.AdapterLinha;
+import com.opss.movibus.ui.fragment.MapsFragment;
 import com.opss.movibus.ui.helper.SimpleItemTouchHelperCallback;
 
 import java.util.ArrayList;
@@ -22,7 +23,6 @@ import java.util.List;
 
 public class LinhasFavoritasActivity extends AppCompatActivity implements Adapter.Actions {
 
-    private Intent intent;
     private RecyclerView recyclerView;
     private AdapterLinha adapter;
     public static View favoritosLayout;
@@ -47,12 +47,20 @@ public class LinhasFavoritasActivity extends AppCompatActivity implements Adapte
         RecyclerView.LayoutManager layout = new LinearLayoutManager(this, LinearLayout.VERTICAL, false);
         recyclerView.setLayoutManager(layout);
 
-        firebaseConections();
-
         //ativar setinho de voltar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (LinhaFavorita linha : MapsFragment.COLLECTIONS.linhasFavoritas.values()) {
+                    favoritoList.add(linha);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     @Override
@@ -63,8 +71,9 @@ public class LinhasFavoritasActivity extends AppCompatActivity implements Adapte
 
     @Override
     public void onClick(View view) {
-        intent = new Intent();
-        intent.putExtra("linha_favorita", adapter.getItem((int) view.getTag()));
+        Intent intent = new Intent();
+        LinhaFavorita linha = adapter.getItem((int) view.getTag());
+        intent.putExtra("linha_favorita", linha.getIdLinha());
         setResult(MainActivity.REQUEST_LINHA_FAVORITA_SELECIONADO, intent);
         finish();
     }
@@ -72,21 +81,5 @@ public class LinhasFavoritasActivity extends AppCompatActivity implements Adapte
     @Override
     public void onLongClick(View view) {
 
-    }
-
-    private void firebaseConections() {
-
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                for (LinhaFavorita linha : MainActivity.LINHAS_FAVORITAS.values()) {
-                    //Favorito favorito = new Favorito(linha);
-                    favoritoList.add(linha);
-                    adapter.notifyDataSetChanged();
-                }
-
-            }
-        });
     }
 }

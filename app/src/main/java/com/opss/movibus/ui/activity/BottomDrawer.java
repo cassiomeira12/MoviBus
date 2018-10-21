@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.common.collect.Maps;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -43,6 +44,7 @@ import com.opss.movibus.model.PontoFavorito;
 
 import com.opss.movibus.model.PontoOnibus;
 import com.opss.movibus.model.Usuario;
+import com.opss.movibus.ui.fragment.MapsFragment;
 
 public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener, ReverseGeo.OnTaskComplete {
     private MainActivity activity;
@@ -79,10 +81,8 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
     List<Observer> observerOnibus = new ArrayList<>();
 
     //-----------------------------
-
+    private boolean visible = false;
     private boolean totalmenteAberto;
-
-
 
     private Marker marker;
     private Onibus onibus;
@@ -216,51 +216,47 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
 
     //FAVORITAR LINHA
     private void favoritar(Onibus onibus) {
-        LinhaFavorita linhaFavorita = new LinhaFavorita(onibus.getLinha());
-
+        LinhaFavorita favorito = new LinhaFavorita(onibus.getLinha());
         String id = usuarioDocumento.collection(LinhaFavorita.COLECAO).document().getId();
-        linhaFavorita.setId(id);
+        favorito.setId(id);
 
-        usuarioDocumento.collection(LinhaFavorita.COLECAO).document(id).set(linhaFavorita);
+        Firebase.get().getFireUsuario().setFavoritoDocument(favorito);
+        MapsFragment.COLLECTIONS.setFavorito(favorito);
 
-        MainActivity.LINHAS_FAVORITAS.put(linhaFavorita.getIdLinha(), linhaFavorita);
+        this.linhaFavorita = favorito;
         favoritoImage.setImageResource(R.drawable.ic_star_black_24dp);
-        this.linhaFavorita = linhaFavorita;
         Toast.makeText(activity, "Linha Favoritada", Toast.LENGTH_LONG).show();
     }
     //FAVORITAR PONTO DE ONIBUS
     private void favoritar(PontoOnibus pontoOnibus) {
-        PontoFavorito pontoFavorito = new PontoFavorito(pontoOnibus);
-
+        PontoFavorito favorito = new PontoFavorito(pontoOnibus);
         String id = usuarioDocumento.collection(PontoFavorito.COLECAO).document().getId();
-        pontoFavorito.setId(id);
+        favorito.setId(id);
 
-        usuarioDocumento.collection(PontoFavorito.COLECAO).document(id).set(pontoFavorito);
+        Firebase.get().getFireUsuario().setFavoritoDocument(favorito);
+        MapsFragment.COLLECTIONS.setFavorito(favorito);
 
-        MainActivity.PONTOS_FAVORITOS.put(pontoFavorito.getIdPonto(), pontoFavorito);
+        this.pontoFavorito = favorito;
         favoritoImage.setImageResource(R.drawable.ic_star_black_24dp);
-        this.pontoFavorito = pontoFavorito;
         Toast.makeText(activity, "Ponto Favoritado", Toast.LENGTH_LONG).show();
     }
     //DESFAVORITAR LINHA
     private void desfavoritar(LinhaFavorita linha) {
+        Firebase.get().getFireUsuario().deletFavoritoDocument(linha);
+        MapsFragment.COLLECTIONS.removeFavorito(linha);
 
-        usuarioDocumento.collection(LinhaFavorita.COLECAO).document(linha.getId()).delete();
-
-        Toast.makeText(activity, "Linha Desfavoritada", Toast.LENGTH_LONG).show();
-        this.favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
-        MainActivity.LINHAS_FAVORITAS.remove(linha.getIdLinha());
         this.linhaFavorita = null;
+        this.favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
+        Toast.makeText(activity, "Linha Desfavoritada", Toast.LENGTH_LONG).show();
     }
     //DESFAVORITAR PONTO
     private void desfavoritar(PontoFavorito ponto) {
+        Firebase.get().getFireUsuario().deletFavoritoDocument(ponto);
+        MapsFragment.COLLECTIONS.removeFavorito(ponto);
 
-        usuarioDocumento.collection(PontoFavorito.COLECAO).document(ponto.getId()).delete();
-
-        Toast.makeText(activity, "Linha Desfavoritada", Toast.LENGTH_LONG).show();
-        this.favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
-        MainActivity.PONTOS_FAVORITOS.remove(ponto.getIdPonto());
         this.pontoFavorito = null;
+        this.favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
+        Toast.makeText(activity, "Linha Desfavoritada", Toast.LENGTH_LONG).show();
     }
 
     public void acompanharOnibus() {
@@ -379,7 +375,9 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
         return true;
     }
 
-
+    public boolean isVisible() {
+        return visible;
+    }
 
     private void drawerMovement(int movement){
         switch (movement) {
@@ -412,6 +410,7 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
     }
 
     public void abrir(Onibus onibus, Marker marker) {
+        this.visible = true;
         this.linearPonto.setVisibility(View.GONE);
         this.linearLinha.setVisibility(View.VISIBLE);//Mostrando Layout da Linha
         this.identificadorText.setText(onibus.getLinha().getNome());
@@ -451,6 +450,7 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
     }
 
     public void abrir(PontoOnibus ponto, Marker marker) {
+        this.visible = true;
         this.linearLinha.setVisibility(View.GONE);
         this.linearPonto.setVisibility(View.VISIBLE);//Mostrando Layout Ponto de Onibus
         this.identificadorText.setText("Ponto");
@@ -488,6 +488,10 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
     }
 
     public void closeAnimate() {
+        if (!visible) {
+            return;
+        }
+        this.visible = false;
         this.isSwitched = false;
         this.totalmenteAberto = false;
         this.animState = S.CLOSE;
@@ -496,72 +500,76 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
     }
 
     public void close() {
+        if (!visible) {
+            return;
+        }
+        this.visible = false;
         this.isSwitched = false;
         this.totalmenteAberto = false;
         this.animState = S.CLOSE;
         this.bottomDrawer.setY(mainlayoutHeight);
+        limpar();
+    }
+
+//    private Runnable ss = new Runnable() {
+//        @Override
+//        public void run() {
+//            openCloseImage.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+//            favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
+//            linearLinha.setVisibility(View.GONE);
+//            linearPonto.setVisibility(View.GONE);
+//        }
+//    };
+
+//    private void closeDrawer2(){
+//        animState = S.TIME_OFF;
+//        this.isSwitched = false;
+//        drawerMovement(DRAWER_DOWN);
+//        limpar();
+//        // Turning on the automatic timer closing drawer
+//        //handlCountDown.postDelayed(closeDrawerTimer, waitMS);
+//    }
+//
+//    private void fechar2() {
+//
+////        animState = S.CLOSE;
+////        totalmenteAberto = false;
+////        openCloseImage.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+////        favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
+////        marker.hideInfoWindow();
+////        limpar();
+//
+//        animState = S.TIME_OFF;
+//        this.isSwitched = false;
+//        drawerMovement(DRAWER_DOWN);
+//    }
+//
+//    private void fecharTotalmente2() {
+//        this.totalmenteAberto = false;
+//        this.openCloseImage.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+//        //this.bottomDrawer.animate().translationY(mainlayoutHeight).setListener(new AnimationListener());
+//        direct = DRAWER_DOWN;
+//        //if (marker != null) {
+//            this.marker.hideInfoWindow();
+//        //}
+//        //fechar();
+//        limpar();
+//    }
+//
+//    private void fechar() {
+//        animState = S.CLOSE;
+//        this.isSwitched = false;
+//        direct = DRAWER_UP;
+//        favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
+//        bottomDrawer.setY(mainlayoutHeight);
+//    }
+
+    private void limpar() {
         if (onibus != null && onibus.getAcompanhando()) {
             marker.showInfoWindow();
         } else if (marker != null) {
             marker.hideInfoWindow();
         }
-        limpar();
-    }
-
-    private Runnable ss = new Runnable() {
-        @Override
-        public void run() {
-            openCloseImage.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
-            favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
-            linearLinha.setVisibility(View.GONE);
-            linearPonto.setVisibility(View.GONE);
-        }
-    };
-
-    private void closeDrawer2(){
-        animState = S.TIME_OFF;
-        this.isSwitched = false;
-        drawerMovement(DRAWER_DOWN);
-        limpar();
-        // Turning on the automatic timer closing drawer
-        //handlCountDown.postDelayed(closeDrawerTimer, waitMS);
-    }
-
-    private void fechar2() {
-
-//        animState = S.CLOSE;
-//        totalmenteAberto = false;
-//        openCloseImage.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
-//        favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
-//        marker.hideInfoWindow();
-//        limpar();
-
-        animState = S.TIME_OFF;
-        this.isSwitched = false;
-        drawerMovement(DRAWER_DOWN);
-    }
-
-    private void fecharTotalmente2() {
-        this.totalmenteAberto = false;
-        this.openCloseImage.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
-        //this.bottomDrawer.animate().translationY(mainlayoutHeight).setListener(new AnimationListener());
-        direct = DRAWER_DOWN;
-        //if (marker != null) {
-            this.marker.hideInfoWindow();
-        //}
-        fechar();
-        limpar();
-    }
-
-    private void fechar() {
-        animState = S.CLOSE;
-        this.isSwitched = false;
-        direct = DRAWER_UP;
-        favoritoImage.setImageResource(R.drawable.ic_star_border_black_24dp);
-        bottomDrawer.setY(mainlayoutHeight);
-    }
-
-    private void limpar() {
         this.marker = null;
         this.onibus = null;
         this.ponto = null;

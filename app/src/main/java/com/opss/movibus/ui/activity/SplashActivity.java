@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 
 import com.opss.movibus.R;
+import com.opss.movibus.firebase.Firebase;
 import com.opss.movibus.util.PastasUtil;
 
 public class SplashActivity extends AppCompatActivity {
@@ -15,6 +16,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         PastasUtil.criarPastas();
+        Firebase.get().getFireUsuario().getFireAuth().useAppLanguage();
 
         setContentView(R.layout.activity_splash_screen);
         Handler handle = new Handler();

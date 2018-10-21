@@ -18,7 +18,6 @@ public class Rota implements Serializable {
     private List<GeoPoint> coordenadas;
     private Map<String, PontoOnibus> pontosOnibus;
 
-
     public Rota() {
         this.id = "";
         this.coordenadas = new ArrayList<>();

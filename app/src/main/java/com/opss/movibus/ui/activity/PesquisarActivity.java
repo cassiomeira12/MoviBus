@@ -3,7 +3,9 @@ package com.opss.movibus.ui.activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.os.PersistableBundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.annotation.NonNull;
 import android.support.v4.view.MenuItemCompat;
@@ -41,8 +43,10 @@ import com.opss.movibus.model.Rota;
 import com.opss.movibus.model.Usuario;
 import com.opss.movibus.ui.adapter.Adapter;
 import com.opss.movibus.ui.adapter.AdapterPesquisa;
+import com.opss.movibus.ui.fragment.MapsFragment;
 import com.opss.movibus.util.SugestoesPesquisasProvider;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,19 +64,15 @@ public class PesquisarActivity extends AppCompatActivity implements Adapter.Acti
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pesquisar);
 
-        //  toolbar = findViewById(R.id.toolbar);
-        //  toolbar.setTitleTextColor(getResources().getColor(R.color.branco));
-        // setSupportActionBar(toolbar);
-
         recyclerView = findViewById(R.id.recycler_view);
         progressBar = findViewById(R.id.progress);
-
-        new BuscarDados();
 
         //ativar setinho de voltar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        new BuscarDados();
     }
 
     @Override
@@ -122,9 +122,9 @@ public class PesquisarActivity extends AppCompatActivity implements Adapter.Acti
                 Object objeto = adapterPesquisa.getItem((int) view.getTag());
 
                 if (objeto instanceof Linha) {
-                    intent.putExtra("pesquisa", (Linha) objeto);
+                    intent.putExtra("pesquisa", ((Linha) objeto).getId());
                 } else if (objeto instanceof PontoOnibus) {
-                    intent.putExtra("pesquisa", (PontoOnibus) objeto);
+                    intent.putExtra("pesquisa", ((PontoOnibus) objeto).getId());
                 } else if (objeto instanceof Rota) {
                     //intent.putExtra("pesquisa", (Rota) objeto);
                 }
@@ -144,6 +144,7 @@ public class PesquisarActivity extends AppCompatActivity implements Adapter.Acti
         recyclerView.setAdapter(adapterPesquisa);
         RecyclerView.LayoutManager layout = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layout);
+        adapterPesquisa.notifyDataSetChanged();
     }
 
     public void pesquisa(String query) {
@@ -179,31 +180,25 @@ public class PesquisarActivity extends AppCompatActivity implements Adapter.Acti
         }
 
         private void buscarLinhas() {
-            Firebase.get().getFireLinha().getCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            AsyncTask.execute(new Runnable() {
                 @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isComplete()) {
-                        List<Linha> linhas = task.getResult().toObjects(Linha.class);
-                        if (linhas != null) {
-                            objects.addAll(linhas);
-                            buscarPontos();
-                        }
+                public void run() {
+                    for (Linha linha : MapsFragment.COLLECTIONS.linhasOnibus.values()) {
+                        objects.add(linha);
                     }
+                    buscarPontos();
                 }
             });
         }
 
         private void buscarPontos() {
-            Firebase.get().getFirePontoOnibus().getCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            AsyncTask.execute(new Runnable() {
                 @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isComplete()) {
-                        List<PontoOnibus> pontoOnibuses = task.getResult().toObjects(PontoOnibus.class);
-                        if (pontoOnibuses != null) {
-                            objects.addAll(pontoOnibuses);
-                            buscarItinerarios();
-                        }
+                public void run() {
+                    for (PontoOnibus ponto : MapsFragment.COLLECTIONS.pontoOnibus.values()) {
+                        objects.add(ponto);
                     }
+                    buscarItinerarios();
                 }
             });
         }

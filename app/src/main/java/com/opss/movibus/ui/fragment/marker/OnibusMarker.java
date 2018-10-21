@@ -29,8 +29,10 @@ public class OnibusMarker extends MarkerObjetct implements EventListener<Documen
         super(R.mipmap.ic_onibus);
         LatLng posicao = new LatLng(onibus.getLatitude(), onibus.getLongitude());
         super.markerOptions.position(posicao);
-        //super.markerOptions.title("");
         this.onibus = onibus;
+        if (onibus.getLinha() != null) {
+            super.markerOptions.title(onibus.getLinha().getNome());
+        }
     }
 
     @Override
@@ -61,11 +63,7 @@ public class OnibusMarker extends MarkerObjetct implements EventListener<Documen
     }
 
     public void setPosicao(double latitude, double longitude) {
-        if (documentReference == null) {
-            return;
-        }
-        //this.documentReference.update("latitude", latitude);
-        //this.documentReference.update("longitude", longitude);
+
     }
 
     public void setCamera(Camera camera) {

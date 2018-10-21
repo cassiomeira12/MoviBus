@@ -75,11 +75,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static Map<String, LinhaFavorita> LINHAS_FAVORITAS;
     public static Map<String, PontoFavorito> PONTOS_FAVORITOS;
 
-    //Firebase
-    private FirebaseAuth autenticacao = FirebaseAuth.getInstance();
-    //private DatabaseReference dataBase;
-    private FirebaseFirestore dataBase = FirebaseFirestore.getInstance();
-
     public static Usuario USUARIO_LOGADO;
     public static ViewHolder vh;
 
@@ -105,29 +100,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         PONTOS_FAVORITOS = new HashMap<>();
 
         mostrarDados();
-        firebaseConections();
-    }
-
-    private void firebaseConections() {
-
-        dataBase.collection(Usuario.COLECAO).document(autenticacao.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                USUARIO_LOGADO = documentSnapshot.toObject(Usuario.class);
-            }
-        });
-
-        dataBase.collection(Usuario.COLECAO).document(autenticacao.getUid()).collection(LinhaFavorita.COLECAO).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isComplete()) {
-                    for (QueryDocumentSnapshot doc : task.getResult()) {
-                        LinhaFavorita linhaFavorita = doc.toObject(LinhaFavorita.class);
-                        LINHAS_FAVORITAS.put(linhaFavorita.getIdLinha(), linhaFavorita);
-                    }
-                }
-            }
-        });
     }
 
     @Override
@@ -151,66 +123,64 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
 
+        String id;
+        Linha linha = null;
+        PontoOnibus ponto = null;
+        LinhaFavorita linhaFavorita = null;
+        PontoFavorito pontoFavorito = null;
+
         switch (resultCode) {
             case REQUEST_FOVORITO_SELECIONADO:
-                mostrarToolbarFiltro();
+                id = data.getStringExtra("favorito");
 
-                Favorito favorito = (Favorito) data.getSerializableExtra("favorito");
-                if (favorito.getLinha() != null) {
-                    //Filtrar Onibus da Liha escolhida
-                    String titulo = favorito.getLinha().getNome();
-                    vh.txtFiltro.setText("Linha " + titulo);
-                    mapsFragment.activityResultLinha(favorito.getLinha().getIdLinha());
-                } else if (favorito.getPonto() != null) {
-                    //Mostrar Ponto de Onibus no Mapa
-                    mapsFragment.activityResultPontoOnibus(favorito.getPonto().getIdPonto());
+                linhaFavorita= MapsFragment.COLLECTIONS.getLinhaFavorita(id);
+                if (linhaFavorita != null) {
+                    mostrarToolbarFiltro();
+                    vh.txtFiltro.setText("Linha " + linhaFavorita.getNome());
+                    mapsFragment.activityResultLinha(id);
+                }
+
+                pontoFavorito = MapsFragment.COLLECTIONS.getPontoFavorito(id);
+                if (pontoFavorito != null) {
+                    mapsFragment.activityResultPontoOnibus(id);
                 }
                 break;
 
             case REQUEST_PESQUISA_SELECIONADO:
-                mostrarToolbarFiltro();
+                id = data.getStringExtra("pesquisa");
 
-                Object objeto = data.getSerializableExtra("pesquisa");
-                if (objeto instanceof Linha) {
-                    //Filtrar Onibus da Liha escolhida
-                    String titulo = ((Linha) objeto).getNome();
-                    vh.txtFiltro.setText("Linha " + titulo);
-                    mapsFragment.activityResultLinha(((Linha) objeto).getId());
-                } else if (objeto instanceof PontoOnibus) {
-                    //Mostrar Ponto de Onibus no Mapa
-                    mapsFragment.activityResultPontoOnibus(((PontoOnibus) objeto).getId());
-                } else if (objeto instanceof Rota) {
+                linha = MapsFragment.COLLECTIONS.getLinha(id);
+                if (linha != null) {
+                    mostrarToolbarFiltro();
+                    vh.txtFiltro.setText("Linha " + linha.getNome());
+                    mapsFragment.activityResultLinha(id);
+                }
 
+                ponto = MapsFragment.COLLECTIONS.getPontoOnibus(id);
+                if (ponto != null) {
+                    mapsFragment.activityResultPontoOnibus(id);
                 }
                 break;
 
             case REQUEST_LINHA_FAVORITA_SELECIONADO:
-                mostrarToolbarFiltro();
-
-                LinhaFavorita linha = (LinhaFavorita) data.getSerializableExtra("linha_favorita");
-                String titulo = linha.getNome();
-                vh.txtFiltro.setText("Linha " + titulo);
-                mapsFragment.activityResultLinha(linha.getIdLinha());
+                id = data.getStringExtra("linha_favorita");
+                linhaFavorita= MapsFragment.COLLECTIONS.getLinhaFavorita(id);
+                if (linhaFavorita != null) {
+                    mostrarToolbarFiltro();
+                    vh.txtFiltro.setText("Linha " + linhaFavorita.getNome());
+                    mapsFragment.activityResultLinha(id);
+                }
                 break;
 
             case REQUEST_PONTO_FAVORITO_SELECIONADO:
-                PontoFavorito ponto = (PontoFavorito) data.getSerializableExtra("ponto_favorito");
-                mapsFragment.activityResultPontoOnibus(ponto.getIdPonto());
+                id = data.getStringExtra("ponto_favorito");
+                pontoFavorito = MapsFragment.COLLECTIONS.getPontoFavorito(id);
+                if (pontoFavorito != null) {
+                    mapsFragment.activityResultPontoOnibus(id);
+                }
                 break;
         }
 
-    }
-
-    private void mostrarToolbarFiltro() {
-        vh.toolbarPrincipal.setVisibility(View.GONE);
-        vh.toolbarPesquisa.setVisibility(View.VISIBLE);
-        setSupportActionBar(vh.toolbarPesquisa);
-        invalidateOptionsMenu();
-
-        //ativar setinho de voltar
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -284,10 +254,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_sair:
                 this.mapsFragment.pararLocalizacaoGPS();
-                this.finish();
-                this.autenticacao.signOut();
-                this.intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
+                Firebase.get().getFireUsuario().getFireAuth().signOut();
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
                 break;
         }
 
@@ -300,6 +269,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onBackPressed() {
 
+        if (appDrawer.isVisible()) {
+            appDrawer.closeAnimate();
+            return;
+        }
+
         if (vh.toolbarPesquisa.getVisibility() == View.VISIBLE) {
             onSupportNavigateUp();
             return;
@@ -310,6 +284,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             super.onBackPressed();
         }
+    }
+
+    private void mostrarToolbarFiltro() {
+        vh.toolbarPrincipal.setVisibility(View.GONE);
+        vh.toolbarPesquisa.setVisibility(View.VISIBLE);
+        setSupportActionBar(vh.toolbarPesquisa);
+        invalidateOptionsMenu();
+
+        //ativar setinho de voltar
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void firebaseConections() {
+        Firebase.get().getFireUsuario().getUserDocument().collection(LinhaFavorita.COLECAO).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isComplete()) {
+                    for (QueryDocumentSnapshot doc : task.getResult()) {
+                        LinhaFavorita linhaFavorita = doc.toObject(LinhaFavorita.class);
+                        LINHAS_FAVORITAS.put(linhaFavorita.getIdLinha(), linhaFavorita);
+                    }
+                }
+            }
+        });
     }
 
     private void mostrarDados() {

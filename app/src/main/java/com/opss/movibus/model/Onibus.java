@@ -103,6 +103,9 @@ public class Onibus implements Serializable {
     @Exclude
     public void setLinha(Linha linha) {
         this.linha = linha;
+        if (marker != null) {
+            marker.setTitulo(linha.getNome());
+        }
     }
 
     @Exclude

@@ -14,6 +14,7 @@ import com.opss.movibus.R;
 import com.opss.movibus.model.PontoFavorito;
 import com.opss.movibus.ui.adapter.Adapter;
 import com.opss.movibus.ui.adapter.AdapterPonto;
+import com.opss.movibus.ui.fragment.MapsFragment;
 import com.opss.movibus.ui.helper.SimpleItemTouchHelperCallback;
 
 import java.util.ArrayList;
@@ -21,7 +22,6 @@ import java.util.List;
 
 public class PontosFavoritosActivity extends AppCompatActivity implements Adapter.Actions {
 
-    private Intent intent;
     private RecyclerView recyclerView;
     private AdapterPonto adapter;
     public static View favoritosLayout;
@@ -46,12 +46,20 @@ public class PontosFavoritosActivity extends AppCompatActivity implements Adapte
         RecyclerView.LayoutManager layout = new LinearLayoutManager(this, LinearLayout.VERTICAL, false);
         recyclerView.setLayoutManager(layout);
 
-        firebaseConections();
-
         //ativar setinho de voltar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (PontoFavorito ponto : MapsFragment.COLLECTIONS.pontosFavoritos.values()) {
+                    favoritoList.add(ponto);
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     @Override
@@ -62,8 +70,9 @@ public class PontosFavoritosActivity extends AppCompatActivity implements Adapte
 
     @Override
     public void onClick(View view) {
-        intent = new Intent();
-        intent.putExtra("ponto_favorito", adapter.getItem((int) view.getTag()));
+        Intent intent = new Intent();
+        PontoFavorito ponto = adapter.getItem((int) view.getTag());
+        intent.putExtra("ponto_favorito", ponto.getIdPonto());
         setResult(MainActivity.REQUEST_PONTO_FAVORITO_SELECIONADO, intent);
         finish();
     }
@@ -71,20 +80,5 @@ public class PontosFavoritosActivity extends AppCompatActivity implements Adapte
     @Override
     public void onLongClick(View view) {
 
-    }
-
-    private void firebaseConections() {
-
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                for (PontoFavorito ponto : MainActivity.PONTOS_FAVORITOS.values()) {
-                    favoritoList.add(ponto);
-                    adapter.notifyDataSetChanged();
-                }
-
-            }
-        });
     }
 }

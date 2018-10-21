@@ -12,9 +12,9 @@ public class Usuario implements Serializable {
 
     private String id;
     private String nome;
+    private String telefone;
     private String email;
     private String senha;
-    private String telefone;
 
     private List<Favorito> favoritoList;
 

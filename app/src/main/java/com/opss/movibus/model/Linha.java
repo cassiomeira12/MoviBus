@@ -4,6 +4,8 @@ package com.opss.movibus.model;
 import com.google.firebase.firestore.Exclude;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Linha implements Serializable {
     @Exclude
@@ -21,6 +23,8 @@ public class Linha implements Serializable {
     private Rota rotaIDA;
     @Exclude
     private Rota rotaVolta;
+    @Exclude
+    private Map<String, Onibus> onibusMap = new HashMap<>();
 
     public Linha() {
         this.id = "";
@@ -32,7 +36,7 @@ public class Linha implements Serializable {
         this.idRotaVolta = "";
     }
 
-    public Linha(String id, String nome, String origem, String destino, String via, String idRotaIda, String idRotaVolta, Rota rotaIDA, Rota rotaVolta) {
+    public Linha(String id, String nome, String origem, String destino, String via, String idRotaIda, String idRotaVolta) {
         this.id = id;
         this.nome = nome;
         this.origem = origem;
@@ -40,8 +44,8 @@ public class Linha implements Serializable {
         this.via = via;
         this.idRotaIda = idRotaIda;
         this.idRotaVolta = idRotaVolta;
-        this.rotaIDA = rotaIDA;
-        this.rotaVolta = rotaVolta;
+        //this.rotaIDA = rotaIDA;
+        //this.rotaVolta = rotaVolta;
     }
 
     public String getId() {
@@ -77,7 +81,7 @@ public class Linha implements Serializable {
     }
 
     public String getVia() {
-        return via;
+        return via.isEmpty() ? "" : " Via " + via;
     }
 
     public void setVia(String via) {
@@ -118,6 +122,28 @@ public class Linha implements Serializable {
     @Exclude
     public Rota getRotaVolta() {
         return rotaVolta;
+    }
+
+    @Exclude
+    public void setOnibus(Onibus onibus) {
+        onibusMap.put(onibus.getId(), onibus);
+    }
+
+    @Exclude
+    public Onibus getOnibus(String idOnibus) {
+        return onibusMap.get(idOnibus);
+    }
+
+    @Exclude
+    public Map<String, Onibus> getOnibusMap() {
+        return onibusMap;
+    }
+
+    @Exclude
+    public void setOnibusVisible(boolean visible) {
+        for (Onibus onibus : onibusMap.values()) {
+            onibus.getMarker().getMarker().setVisible(visible);
+        }
     }
 
     @Override
