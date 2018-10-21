@@ -16,10 +16,6 @@ public class FireUsuario implements IFirebase<Usuario> {
         this.collection = FirebaseFirestore.getInstance().collection(colecao);
     }
 
-    public DocumentReference getUserDocument() {
-        return collection.document(FirebaseAuth.getInstance().getCurrentUser().getUid());
-    }
-
     @Override
     public CollectionReference getCollection() {
         return collection;
@@ -39,5 +35,15 @@ public class FireUsuario implements IFirebase<Usuario> {
     public void updateDocument(Usuario document) {
 
     }
+
+    public DocumentReference getUserDocument() {
+        return collection.document(FirebaseAuth.getInstance().getCurrentUser().getUid());
+    }
+
+    public FirebaseAuth getFireAuth() {
+        return FirebaseAuth.getInstance();
+    }
+
+
 
 }

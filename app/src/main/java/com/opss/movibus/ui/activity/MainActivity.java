@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Intent intent;
 
+    public static BottomDrawer appDrawer;//Menu inferior
+
     private FragmentManager fragmentManager;//Gerenciador de Fragmentos
     private MapsFragment mapsFragment;//Fragment do GoogleMaps
 
@@ -87,30 +89,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         vh = new ViewHolder();
 
-        FAVORITOS = new ArrayList<>();
-        FAVORITOS_MAP = new HashMap<>();
-
-        LINHAS_FAVORITAS = new HashMap<>();
-        PONTOS_FAVORITOS = new HashMap<>();
+        //Inicia o Menu Inferior
+        appDrawer = new BottomDrawer(MainActivity.this);
 
         //Instanciando o Gerenciado de Fragmentos
         fragmentManager = getSupportFragmentManager();
-
-//        //Fragmento do GoogleMaps
-//        mapsFragment = new MapsFragment(this);
-//        //Adicioando o Fragmento do GoogleMaps na Activity Main
-//        FragmentTransaction transaction = fragmentManager.beginTransaction();
-//        transaction.add(R.id.frame_google_maps, mapsFragment, "MapsFragment");
-//        transaction.commitAllowingStateLoss();
-
-        MapsFragment teste = new MapsFragment();
+        mapsFragment = new MapsFragment();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.frame_google_maps, teste, "MapsFragment");
+        transaction.add(R.id.frame_google_maps, mapsFragment);
         transaction.commitAllowingStateLoss();
-        mapsFragment = teste;
 
-        firebaseConections();
+        FAVORITOS = new ArrayList<>();
+        FAVORITOS_MAP = new HashMap<>();
+        LINHAS_FAVORITAS = new HashMap<>();
+        PONTOS_FAVORITOS = new HashMap<>();
+
         mostrarDados();
+        firebaseConections();
     }
 
     private void firebaseConections() {
@@ -133,18 +128,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
-
-//        dataBase.collection(Usuario.COLECAO).document(autenticacao.getUid()).collection(PontoFavorito.COLECAO).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                if (task.isComplete()) {
-//                    for (QueryDocumentSnapshot doc : task.getResult()) {
-//                        PontoFavorito pontoFavorito = doc.toObject(PontoFavorito.class);
-//                        PONTOS_FAVORITOS.put(pontoFavorito.getIdPonto(), pontoFavorito);
-//                    }
-//                }
-//            }
-//        });
     }
 
     @Override
@@ -252,16 +235,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-
     public void abrirTelaPesquisar(View view) {
-        vh.appDrawer.close();
+        appDrawer.close();
         this.intent = new Intent(this, PesquisarActivity.class);
         startActivityForResult(intent, REQUEST_PESQUISA_SELECIONADO);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        vh.appDrawer.close();
+        appDrawer.close();
 
         int id = item.getItemId();
 
@@ -309,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
 
-        vh.appDrawer.close();
+        appDrawer.close();
         vh.drawerLayout.closeDrawer(GravityCompat.START);
 
         return true;
@@ -331,30 +313,47 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void mostrarDados() {
-        Firebase.get().getFireUsuario().getUserDocument().addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                if (e == null) {
-                    Usuario usuario = documentSnapshot.toObject(Usuario.class);
 
-                    USUARIO_LOGADO = usuario;
-                    vh.textNome.setText(USUARIO_LOGADO.getNome());
-                    vh.textTelefone.setText(USUARIO_LOGADO.getEmail());
+        USUARIO_LOGADO = (Usuario) getIntent().getSerializableExtra("USUARIO_LOGADO");
 
-                    Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
-                    Picasso.with(MainActivity.this)
-                            .load(uri)
-                            .placeholder(android.R.drawable.sym_def_app_icon)
-                            .error(android.R.drawable.sym_def_app_icon)
-                            .into(vh.imagemUsuario);
+        if (USUARIO_LOGADO == null) {
 
-                } else { //falha
-                    startActivity(new Intent(getApplicationContext(), LoginActivity.class));
-                    Toast.makeText(getApplicationContext(), "Falha de autenticacao", Toast.LENGTH_SHORT).show();
-                    finish();
+            Firebase.get().getFireUsuario().getUserDocument().addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                    if (e == null) {
+                        Usuario usuario = documentSnapshot.toObject(Usuario.class);
+
+                        USUARIO_LOGADO = usuario;
+                        vh.textNome.setText(USUARIO_LOGADO.getNome());
+                        vh.textTelefone.setText(USUARIO_LOGADO.getEmail());
+
+                        Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
+                        Picasso.with(MainActivity.this)
+                                .load(uri)
+                                .placeholder(android.R.drawable.sym_def_app_icon)
+                                .error(android.R.drawable.sym_def_app_icon)
+                                .into(vh.imagemUsuario);
+
+                    } else { //falha
+                        startActivity(new Intent(getApplicationContext(), LoginActivity.class));
+                        Toast.makeText(getApplicationContext(), "Falha de autenticacao", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
                 }
-            }
-        });
+            });
+
+        } else {
+            vh.textNome.setText(USUARIO_LOGADO.getNome());
+            vh.textTelefone.setText(USUARIO_LOGADO.getEmail());
+
+            Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
+            Picasso.with(MainActivity.this)
+                    .load(uri)
+                    .placeholder(android.R.drawable.sym_def_app_icon)
+                    .error(android.R.drawable.sym_def_app_icon)
+                    .into(vh.imagemUsuario);
+        }
 
     }
 
@@ -371,7 +370,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public TextView txtFiltro;
 
         public DrawerLayout drawerLayout;//Drawer MenuLateral
-        public BottomDrawer appDrawer;//Menu inferior
 
         public NavigationView navigationView;
 
@@ -379,9 +377,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView = findViewById(R.id.menu_lateral);
             navigationView.setNavigationItemSelectedListener(MainActivity.this);
 
-            imagemUsuario = navigationView.getHeaderView(0).findViewById(R.id.imagem_usuario);
-            textNome = navigationView.getHeaderView(0).findViewById(R.id.text_nome_usuario);
-            textTelefone = navigationView.getHeaderView(0).findViewById(R.id.text_usuario_telefone);
+            imagemUsuario = navigationView.getHeaderView(0).findViewById(R.id.img_usuario);
+            textNome = navigationView.getHeaderView(0).findViewById(R.id.txt_nome_usuario);
+            textTelefone = navigationView.getHeaderView(0).findViewById(R.id.txt_usuario_email);
 
             //Toolbar estar no xml content_main
             toolbarPrincipal = findViewById(R.id.toolbar);//Barra de pesquisa superior
@@ -395,9 +393,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, toolbarPrincipal, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
             drawerLayout.addDrawerListener(toggle);
             toggle.syncState();
-
-            //Inicia o Menu Inferior
-            appDrawer = new BottomDrawer(MainActivity.this);
 
             drawerLayout.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override

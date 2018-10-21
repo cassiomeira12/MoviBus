@@ -153,6 +153,7 @@
                 android:layout_gravity="end"
                 android:onClick="onClick"
                 android:text="DESATIVAR CONTA" />
+
         </LinearLayout>
 
     </ScrollView>
@@ -192,4 +193,5 @@
             android:textColor="@color/branco" />
 
     </LinearLayout>
+
 </LinearLayout>

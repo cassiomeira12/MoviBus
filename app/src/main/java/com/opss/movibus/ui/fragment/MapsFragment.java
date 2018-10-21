@@ -94,7 +94,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
         this.activity = (MainActivity) getActivity();
         //this.appDrawer = activity.vh.appDrawer;
-        this.appDrawer = MainActivity.vh.appDrawer;
+        this.appDrawer = MainActivity.appDrawer;
 
         onibusMap = new HashMap<>();
         pontoOnibusMap = new HashMap<>();

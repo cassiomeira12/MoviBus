@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">MoviBus</string>
+    <string name="pesquisar">Pesquisar</string>
+    <string name="meus_favoritos">Meus Favoritos</string>
+    <string name="linhas_favoritas">Linhas Favoritas</string>
+    <string name="pontos_favoritos">Pontos Favoritos</string>
+    <string name="configurações">Configurações</string>
+    <string name="configurações_conta">Configurações da Conta</string>
+    <string name="cadastrar_conta">Cadastrar Conta</string>
+
+
+
     <string name="title_activity_maps">Map</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -18,10 +28,9 @@
 
     <string name="key_notificacoes">key_notificacoes</string>
     <string name="key_localizacao_gps">key_localizacao_gps</string>
-    <string name="pesquisar_">Pesquisar ônibus, linhas, itinerários</string>
-    <string name="pesquisar">Pesquisar</string>
     <string name="nome">Nome</string>
-    <string name="telefone">telefone</string>
+    <string name="pesquisar_">Pesquisar ônibus, linhas, itinerários</string>
+    <string name="telefone">Telefone</string>
     <string name="senha">Senha</string>
     <string name="email">Email</string>
     <string name="confirma_nova_senha">Confirma a nova senha</string>
@@ -38,4 +47,7 @@
     <string name="senha_invalida">Senha inválida</string>
     <string name="senha_nao_confere">Senhas não conferem</string>
     <string name="dados_atualizados">Dados atualizados</string>
+    <string name="cadastrar">Cadastrar</string>
+    <string name="confirmar_senha">Confirmar Senha</string>
+    <string name="recuperar_senha">Recuperar Senha</string>
 </resources>

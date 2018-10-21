@@ -10,14 +10,14 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/imagem_usuario"
+        android:id="@+id/img_usuario"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_marginTop="16dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:src="@drawable/baseline_account_circle_white_48dp"/>
 
     <TextView
-        android:id="@+id/text_nome_usuario"
+        android:id="@+id/txt_nome_usuario"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
@@ -25,9 +25,9 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
-        android:id="@+id/text_usuario_telefone"
+        android:id="@+id/txt_usuario_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Telefone do Usuario" />
+        android:text="usuario@email.com" />
 
 </LinearLayout>

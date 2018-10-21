@@ -1,18 +1,13 @@
 package com.opss.movibus.ui.activity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -27,13 +22,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.opss.movibus.firebase.Firebase;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
@@ -42,46 +33,18 @@ import dmax.dialog.SpotsDialog;
 import com.opss.movibus.R;
 import com.opss.movibus.model.Usuario;
 
-import javax.annotation.Nullable;
-
 public class LoginActivity extends AppCompatActivity {
 
-    private Intent intent;
-    private LinearLayout loginLayout;
-
-
-    private MaterialEditText emailText;
-    private MaterialEditText senhaText;
-    private TextView recuperarSenha;
-
-    private Button btnCadastrar, btnLogar;
-    private SignInButton googleButton;
-
-
-    private FirebaseAuth autenticacao = FirebaseAuth.getInstance();
-    //private FirebaseDatabase bancoDados;
-    //private DatabaseReference bancoDadosFirebase;
-    private FirebaseFirestore dataBase = FirebaseFirestore.getInstance();
-
+    private ViewHolder viewHolder;
 
     private GoogleSignInClient mGoogleSignInClient;
     private static final int RC_SIGN_IN = 9001;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        loginLayout = (LinearLayout) findViewById(R.id.login_layout);
-
-        emailText = findViewById(R.id.email_text);
-        senhaText = findViewById(R.id.senha_text);
-        recuperarSenha = findViewById(R.id.recuperar_senha);
-
-        btnCadastrar = (Button) findViewById(R.id.btn_cadastrar);
-        btnLogar = (Button) findViewById(R.id.btn_logar);
-        googleButton = findViewById(R.id.googleButton);
+        viewHolder = new ViewHolder();
 
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -92,52 +55,11 @@ public class LoginActivity extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         //Caso o Usuario já esteja logado
-        if (autenticacao.getCurrentUser() != null) {
-            intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
+        if (Firebase.get().getFireUsuario().getFireAuth().getCurrentUser() != null) {
+            startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         }
 
-        //bancoDados = FirebaseDatabase.getInstance();
-        //usuariosBD = bancoDados.getReference("Usuarios");
-        //bancoDadosFirebase = FirebaseDatabase.getInstance().getReference();
-
-        btnLogar.setOnClickListener((OnClickListener) -> logar());
-
-        googleButton.setOnClickListener((OnClickListener) -> signInGoogle());
-
-//        btnLogar.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                mostrarAlertaLogar();
-//            }
-//        });
-
-        btnCadastrar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mostrarAlertaCadastrar();
-            }
-        });
-    }
-
-    public void signInGoogle() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    private void signOut() {
-        // Firebase sign out
-        autenticacao.signOut();
-
-        // Google sign out
-        mGoogleSignInClient.signOut().addOnCompleteListener(this,
-                new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        //updateUI(null);
-                    }
-                });
     }
 
     @Override
@@ -151,324 +73,169 @@ public class LoginActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
-                //Log.w(TAG, "Google sign in failed", e);
-                // [START_EXCLUDE]
-                updateUI(null);
-                // [END_EXCLUDE]
+
             }
         }
     }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-
-        SpotsDialog alertaEspera = new SpotsDialog(LoginActivity.this);
-        alertaEspera.show();
-
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        autenticacao.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            //Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = autenticacao.getCurrentUser();
-
-                            String nome = user.getDisplayName();
-                            String email = user.getEmail();
-                            String senha = "";
-                            String telefone = user.getPhoneNumber();
-
-                            //Criando objeto do Usuario
-                            Usuario novoUsuario = new Usuario();
-                            novoUsuario.setId(user.getUid());
-                            novoUsuario.setNome(nome);
-                            novoUsuario.setEmail(email);
-                            novoUsuario.setSenha(senha);
-                            novoUsuario.setTelefone(telefone);
-
-                            Firebase.get().getFireUsuario().getCollection().document(novoUsuario.getId()).set(novoUsuario).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    Snackbar.make(loginLayout, "Usuário cadastrado com sucesso!", Snackbar.LENGTH_LONG).show();
-
-                                    intent = new Intent(LoginActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                    finish();
-
-                                    alertaEspera.dismiss();
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    alertaEspera.dismiss();
-                                    Snackbar.make(loginLayout, "Erro " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                                }
-                            });
-
-                        } else {
-                            alertaEspera.dismiss();
-                            Snackbar.make(loginLayout, "Erro no cadastro", Snackbar.LENGTH_LONG).show();
-                        }
-
-                    }
-                });
-    }
-
-    private void updateUI(FirebaseUser user) {
-        //hideProgressDialog();
-        if (user != null) {
-            //mStatusTextView.setText(getString(R.string.google_status_fmt, user.getEmail()));
-            //mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-            Log.i("CASSIO", user.getDisplayName());
-            Log.i("CASSIO", user.getEmail());
-            //Log.i("CASSIO", user.getPhoneNumber());
-            Log.i("CASSIO", user.getUid());
-
-            //findViewById(R.id.sign_in_button).setVisibility(View.GONE);
-            //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
-        } else {
-            //mStatusTextView.setText(R.string.signed_out);
-            //mDetailTextView.setText(null);
-            Log.i("CASSIO", "Deu errado");
-            //findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
-            //findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
-        }
-    }
-
-    private void logar() {
+    public void logar(View view) {
         //Verificando se o Email esta vazio
-        if (TextUtils.isEmpty(emailText.getText().toString())) {
-            Snackbar.make(loginLayout, "Informe o email", Snackbar.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(viewHolder.emailText.getText().toString())) {
+            Snackbar.make(getCurrentFocus(), "Informe o email", Snackbar.LENGTH_SHORT).show();
             return;
         }
 
         //Verificando se a Senha esta vazia
-        if (TextUtils.isEmpty(senhaText.getText().toString())) {
-            Snackbar.make(loginLayout, "Informe a senha", Snackbar.LENGTH_SHORT).show();
+        if (TextUtils.isEmpty(viewHolder.senhaText.getText().toString())) {
+            Snackbar.make(getCurrentFocus(), "Informe a senha", Snackbar.LENGTH_SHORT).show();
             return;
         }
 
-        String email = emailText.getText().toString();
-        String senha = senhaText.getText().toString();
+        String email = viewHolder.emailText.getText().toString();
+        String senha = viewHolder.senhaText.getText().toString();
 
         SpotsDialog alertaEspera = new SpotsDialog(LoginActivity.this);
         alertaEspera.show();
 
-        btnLogar.setEnabled(false);//Desabilitando botao de logar
-
-        autenticacao.signInWithEmailAndPassword(email, senha).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+        Firebase.get().getFireUsuario().getFireAuth().signInWithEmailAndPassword(email, senha).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
             @Override
             public void onSuccess(AuthResult authResult) {
-                //dataBase.collection(Usuario.COLECAO).document().
-
-                Firebase.get().getFireUsuario().getUserDocument().addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                Firebase.get().getFireUsuario().getCollection().document(authResult.getUser().getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
-                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                        if (e == null){
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        //if (documentSnapshot.exists()) {
                             Usuario usuario = documentSnapshot.toObject(Usuario.class);
-
-                            intent = new Intent(LoginActivity.this, MainActivity.class);
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             intent.putExtra("USUARIO_LOGADO", usuario);
                             startActivity(intent);
+                            alertaEspera.dismiss();
                             finish();
-                        }else{ //falha
-
-                        }
+//                        } else {
+//                            alertaEspera.dismiss();
+//                            Snackbar.make(getCurrentFocus(), "Erro, conta inexistente!", Snackbar.LENGTH_LONG).show();
+//                        }
                     }
                 });
-
-                alertaEspera.dismiss();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 alertaEspera.dismiss();
-                Snackbar.make(loginLayout, "Erro " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                btnLogar.setEnabled(true);//Habilitando botao de logar
+                Snackbar.make(getCurrentFocus(), "Erro ao tentar realizar login", Snackbar.LENGTH_LONG).show();
             }
         });
-    }
-
-    //Chama o Alerta para fazer Login
-    private void mostrarAlertaLogar() {
-        AlertDialog.Builder alerta = new AlertDialog.Builder(this);
-        alerta.setTitle("LOGAR");
-        alerta.setMessage("Use o email para Logar");
-
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View layout_login = inflater.inflate(R.layout.layout_logar, null);
-
-        final MaterialEditText editEmail = layout_login.findViewById(R.id.edit_email);
-        final MaterialEditText editSenha = layout_login.findViewById(R.id.edit_senha);
-
-        alerta.setView(layout_login);
-
-        //Botao de confirmacao
-        alerta.setPositiveButton("LOGAR", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.dismiss();
-
-                btnLogar.setEnabled(false);//Desativando botao de Login
-
-                //Verificando se o Email esta vazio
-                if (TextUtils.isEmpty(editEmail.getText().toString())) {
-                    Snackbar.make(loginLayout, "Informe o email", Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-
-                //Verificando se a Senha esta vazia
-                if (TextUtils.isEmpty(editSenha.getText().toString())) {
-                    Snackbar.make(loginLayout, "Informe a senha", Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-
-                String email = editEmail.getText().toString();
-                String senha = editSenha.getText().toString();
-
-                SpotsDialog alertaEspera = new SpotsDialog(LoginActivity.this);
-                alertaEspera.show();
-
-                autenticacao.signInWithEmailAndPassword(email, senha).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                    @Override
-                    public void onSuccess(AuthResult authResult) {
-                        intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                        alertaEspera.dismiss();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        alertaEspera.dismiss();
-                        Snackbar.make(loginLayout, "Erro " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                        btnLogar.setEnabled(true);//Habilitando botao de logar
-                    }
-                });
-
-            }
-        });
-
-        //Botao de cancelamento
-        alerta.setNegativeButton("CANCELAR", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        //Mostrando o alerta
-        alerta.show();
 
     }
 
-    private void mostrarAlertaCadastrar() {
-        AlertDialog.Builder alerta = new AlertDialog.Builder(this);
-        alerta.setTitle("CADASTAR");
-        alerta.setMessage("Cadastre com o email");
+    public void signInGoogle() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
 
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View layout_cadastrar = inflater.inflate(R.layout.layout_cadastrar, null);
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
 
-        final MaterialEditText editEmail = layout_cadastrar.findViewById(R.id.edit_email);
-        final MaterialEditText editSenha = layout_cadastrar.findViewById(R.id.edit_senha);
-        final MaterialEditText editNome = layout_cadastrar.findViewById(R.id.edit_nome);
-        final MaterialEditText editTelefone = layout_cadastrar.findViewById(R.id.edit_telefone);
+        SpotsDialog dialog = new SpotsDialog(LoginActivity.this);
+        dialog.show();
 
-        alerta.setView(layout_cadastrar);
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
 
-
-        //Botao de confirmacao
-        alerta.setPositiveButton("CADASTRAR", new DialogInterface.OnClickListener() {
+        Firebase.get().getFireUsuario().getFireAuth().signInWithCredential(credential).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //Verificando se o Email esta vazio
-                if (TextUtils.isEmpty(editEmail.getText().toString())) {
-                    Snackbar.make(loginLayout, "Informe o email", Snackbar.LENGTH_LONG).show();
-                    return;
-                }
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    FirebaseUser user = Firebase.get().getFireUsuario().getFireAuth().getCurrentUser();
 
-                //Verificando se a Senha esta vazia
-                if (TextUtils.isEmpty(editSenha.getText().toString())) {
-                    Snackbar.make(loginLayout, "Informe a senha", Snackbar.LENGTH_LONG).show();
-                    return;
-                }
-
-                //Verificando se o Nome esta vazio
-                if (TextUtils.isEmpty(editNome.getText().toString())) {
-                    Snackbar.make(loginLayout, "Informe o nome", Snackbar.LENGTH_LONG).show();
-                    return;
-                }
-
-                //Verificando se o Telefone esta vazio
-                if (TextUtils.isEmpty(editNome.getText().toString())) {
-                    Snackbar.make(loginLayout, "Informe o nome", Snackbar.LENGTH_LONG).show();
-                    return;
-                }
-
-                SpotsDialog alertaEspera = new SpotsDialog(LoginActivity.this);
-                alertaEspera.show();
-
-                String nome = editNome.getText().toString();
-                String email = editEmail.getText().toString();
-                String senha = editSenha.getText().toString();
-                String telefone = editTelefone.getText().toString();
-
-                autenticacao.createUserWithEmailAndPassword(email, senha).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                    @Override
-                    public void onSuccess(AuthResult authResult) {
-                        //Criando objeto do Usuario
-                        Usuario novoUsuario = new Usuario();
-                        novoUsuario.setId(authResult.getUser().getUid());
-                        novoUsuario.setNome(nome);
-                        novoUsuario.setEmail(email);
-                        novoUsuario.setSenha(senha);
-                        novoUsuario.setTelefone(telefone);
-
-                        dataBase.collection("usuarios").document(novoUsuario.getId()).set(novoUsuario).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Snackbar.make(loginLayout, "Usuário cadastrado com sucesso!", Snackbar.LENGTH_LONG).show();
-
-                                intent = new Intent(LoginActivity.this, MainActivity.class);
+                    //Verificando se já existe uma conta da google cadastrada
+                    Firebase.get().getFireUsuario().getCollection().document(user.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            if (documentSnapshot.exists()) {
+                                Usuario usuario = documentSnapshot.toObject(Usuario.class);
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                intent.putExtra("USUARIO_LOGADO", usuario);
                                 startActivity(intent);
+                                dialog.dismiss();
                                 finish();
+                            } else {
+                                //Cadastrando a nova Conta
+                                String nome = user.getDisplayName();
+                                String email = user.getEmail();
+                                String senha = "";
+                                String telefone = "";
 
-                                alertaEspera.dismiss();
+                                //Criando objeto do Usuario
+                                Usuario usuario = new Usuario();
+                                usuario.setId(user.getUid());
+                                usuario.setNome(nome);
+                                usuario.setEmail(email);
+                                usuario.setSenha(senha);
+                                usuario.setTelefone(telefone);
+
+                                cadastrarObjetoUsuario(usuario, dialog);
                             }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                alertaEspera.dismiss();
-                                Snackbar.make(loginLayout, "Erro " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        alertaEspera.dismiss();
-                        Snackbar.make(loginLayout, "Erro " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                    }
-                });
-
+                        }
+                    });
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                dialog.dismiss();
+                Snackbar.make(getCurrentFocus(), "Erro ao efetuar o login", Snackbar.LENGTH_LONG).show();
             }
         });
 
-        //Botao de cancelamento
-        alerta.setNegativeButton("CANCELAR", new DialogInterface.OnClickListener() {
+    }
+
+    private void cadastrarObjetoUsuario(Usuario usuario, SpotsDialog dialog) {
+        Firebase.get().getFireUsuario().getCollection().document(usuario.getId()).set(usuario).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onSuccess(Void aVoid) {
+                Snackbar.make(getCurrentFocus(), "Usuário cadastrado com sucesso!", Snackbar.LENGTH_LONG).show();
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent.putExtra("USUARIO_LOGADO", usuario);
+                startActivity(intent);
+                dialog.dismiss();
+                finish();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Snackbar.make(getCurrentFocus(), "Erro " + e.getMessage(), Snackbar.LENGTH_LONG).show();
                 dialog.dismiss();
             }
         });
+    }
 
-        //Mostrando o alerta
-        alerta.show();
+    private class ViewHolder {
+
+        private final MaterialEditText emailText;
+        private final MaterialEditText senhaText;
+        private final TextView recuperarSenha;
+
+        private final Button btnCadastrar, btnLogar;
+        private final SignInButton googleButton;
+
+        public ViewHolder() {
+            emailText = findViewById(R.id.email_text);
+            senhaText = findViewById(R.id.senha_text);
+            recuperarSenha = findViewById(R.id.recuperar_senha);
+
+            recuperarSenha.setVisibility(View.GONE);
+
+            btnCadastrar = findViewById(R.id.btn_cadastrar);
+            btnLogar = findViewById(R.id.btn_logar);
+            googleButton = findViewById(R.id.googleButton);
+
+            //btnLogar.setOnClickListener((OnClickListener) -> logar());
+            googleButton.setOnClickListener((OnClickListener) -> signInGoogle());
+            btnCadastrar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(new Intent(LoginActivity.this, CadastroActivity.class));
+                }
+            });
+        }
 
     }
 
