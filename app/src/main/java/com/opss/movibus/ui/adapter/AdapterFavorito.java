@@ -14,8 +14,10 @@ import java.util.Collections;
 import java.util.List;
 
 import com.opss.movibus.R;
+import com.opss.movibus.firebase.Firebase;
 import com.opss.movibus.model.Favorito;
 import com.opss.movibus.ui.activity.FavoritosActivity;
+import com.opss.movibus.ui.fragment.MapsFragment;
 import com.opss.movibus.ui.helper.ItemTouchHelperAdapter;
 
 public class AdapterFavorito extends Adapter<Favorito> implements ItemTouchHelperAdapter {
@@ -95,12 +97,27 @@ public class AdapterFavorito extends Adapter<Favorito> implements ItemTouchHelpe
             public void onClick(View view) {
                 itensList.add(ultimaPosicaoRemovida, ultimoRemovido);
                 notifyDataSetChanged();
+                if (ultimoRemovido.getLinha() != null) {
+                    Firebase.get().getFireUsuario().setFavoritoDocument(ultimoRemovido.getLinha());
+                    MapsFragment.COLLECTIONS.setFavorito(ultimoRemovido.getLinha());
+                } else if (ultimoRemovido.getPonto() != null) {
+                    Firebase.get().getFireUsuario().setFavoritoDocument(ultimoRemovido.getPonto());
+                    MapsFragment.COLLECTIONS.setFavorito(ultimoRemovido.getPonto());
+                }
             }
         });
         mySnackbar.show();
 
         ultimoRemovido = getItem(position);
         ultimaPosicaoRemovida = position;
+
+        if (ultimoRemovido.getLinha() != null) {
+            Firebase.get().getFireUsuario().deletFavoritoDocument(ultimoRemovido.getLinha());
+            MapsFragment.COLLECTIONS.removeFavorito(ultimoRemovido.getLinha());
+        } else if (ultimoRemovido.getPonto() != null) {
+            Firebase.get().getFireUsuario().deletFavoritoDocument(ultimoRemovido.getPonto());
+            MapsFragment.COLLECTIONS.removeFavorito(ultimoRemovido.getPonto());
+        }
 
         itensList.remove(position);
         notifyItemRemoved(position);

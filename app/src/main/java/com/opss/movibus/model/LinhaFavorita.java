@@ -33,6 +33,7 @@ public class LinhaFavorita implements Serializable {
     }
 
     public LinhaFavorita(Linha linha) {
+        this.linha = linha;
         this.idLinha = linha.getId();
         this.nome = linha.getNome();
         this.via = linha.getVia();

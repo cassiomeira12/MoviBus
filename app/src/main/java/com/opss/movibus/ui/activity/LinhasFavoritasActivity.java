@@ -33,9 +33,9 @@ public class LinhasFavoritasActivity extends AppCompatActivity implements Adapte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_linhas_favoritas);
+        setContentView(R.layout.activity_favoritos);
 
-        this.favoritosLayout = findViewById(R.id.linhas_favoritas);
+        this.favoritosLayout = findViewById(R.id.meus_favoritos);
         this.favoritoList = new ArrayList<>();
         this.recyclerView = findViewById(R.id.recycler_view_favoritos);
         this.adapter = new AdapterLinha(favoritoList, this, this, this);

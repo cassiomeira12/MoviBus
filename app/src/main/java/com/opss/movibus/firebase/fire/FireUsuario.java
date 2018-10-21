@@ -59,7 +59,7 @@ public class FireUsuario implements IFirebase<Usuario> {
     }
 
     public void deletFavoritoDocument(PontoFavorito ponto) {
-        getUserDocument().collection(LinhaFavorita.COLECAO).document(ponto.getId()).delete();
+        getUserDocument().collection(PontoFavorito.COLECAO).document(ponto.getId()).delete();
     }
 
 }

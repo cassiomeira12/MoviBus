@@ -638,7 +638,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         }
 
         public void setFavorito(LinhaFavorita linha) {
-            linhasFavoritas.put(linha.getId(), linha);
+            linhasFavoritas.put(linha.getIdLinha(), linha);
         }
 
         public void setFavorito(PontoFavorito ponto) {
@@ -662,11 +662,11 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         }
 
         public void removeFavorito(LinhaFavorita linha) {
-            linhasFavoritas.remove(linha.getId());
+            linhasFavoritas.remove(linha.getIdLinha());
         }
 
         public void removeFavorito(PontoFavorito ponto) {
-            pontosFavoritos.remove(ponto.getId());
+            pontosFavoritos.remove(ponto.getIdPonto());
         }
 
     }

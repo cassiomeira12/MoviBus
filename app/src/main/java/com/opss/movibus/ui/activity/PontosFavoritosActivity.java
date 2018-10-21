@@ -28,13 +28,13 @@ public class PontosFavoritosActivity extends AppCompatActivity implements Adapte
 
     private List<PontoFavorito> favoritoList;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pontos_favoritos);
+        setContentView(R.layout.activity_favoritos);
 
-        this.favoritosLayout = findViewById(R.id.linhas_favoritas);
+        this.favoritosLayout = findViewById(R.id.meus_favoritos);
+
         this.favoritoList = new ArrayList<>();
         this.recyclerView = findViewById(R.id.recycler_view_favoritos);
         this.adapter = new AdapterPonto(favoritoList, this, this, this);

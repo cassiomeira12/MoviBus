@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/meus_favoritos"
-    tools:context="com.opss.movibus.ui.activity.FavoritosActivity">
+    android:id="@+id/meus_favoritos">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_view_favoritos"

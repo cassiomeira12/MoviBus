@@ -15,8 +15,12 @@ import android.widget.TextView;
 import java.util.Collections;
 
 import com.opss.movibus.R;
+import com.opss.movibus.firebase.Firebase;
 import com.opss.movibus.model.LinhaFavorita;
 import com.opss.movibus.ui.activity.FavoritosActivity;
+import com.opss.movibus.ui.activity.LinhasFavoritasActivity;
+import com.opss.movibus.ui.fragment.MapsFragment;
+import com.opss.movibus.ui.fragment.marker.MarkerObjetct;
 import com.opss.movibus.ui.helper.ItemTouchHelperAdapter;
 
 
@@ -48,10 +52,10 @@ public class AdapterLinha extends Adapter<LinhaFavorita> implements ItemTouchHel
         viewHolder.linearLinha.setVisibility(View.VISIBLE);
 
         viewHolder.imageIcone.setImageResource(R.mipmap.ic_onibus);
-        viewHolder.textDescricao.setText(linha.getNome() + " VIA " + linha.getVia());
+        viewHolder.textDescricao.setText(linha.getNome() + linha.getVia());
         viewHolder.textOrigem.setText(linha.getOrigem());
         viewHolder.textDestino.setText(linha.getDestino());
-        viewHolder.textQuantidadeOnibus.setText(String.valueOf(linha.getOnibusOnline()));
+        viewHolder.textQuantidadeOnibus.setText(String.valueOf(linha.linha.getOnibusMap().size()));
 
         viewHolder.itemFavorito.setTag(position);
     }
@@ -79,18 +83,23 @@ public class AdapterLinha extends Adapter<LinhaFavorita> implements ItemTouchHel
     @Override
     public void onItemDismiss(int position) {
         //mostra opção de desfazer a exclusão
-        Snackbar mySnackbar = Snackbar.make(FavoritosActivity.favoritosLayout, getItem(position).getIdentificador() + " removido dos favoritos", 7000);
+        Snackbar mySnackbar = Snackbar.make(LinhasFavoritasActivity.favoritosLayout, getItem(position).getIdentificador() + " removido dos favoritos", 7000);
         mySnackbar.setAction("Desfazer", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 itensList.add(ultimaPosicaoRemovida, ultimoRemovido);
                 notifyDataSetChanged();
+                Firebase.get().getFireUsuario().setFavoritoDocument(ultimoRemovido);
+                MapsFragment.COLLECTIONS.setFavorito(ultimoRemovido);
             }
         });
         mySnackbar.show();
 
         ultimoRemovido = getItem(position);
         ultimaPosicaoRemovida = position;
+
+        Firebase.get().getFireUsuario().deletFavoritoDocument(ultimoRemovido);
+        MapsFragment.COLLECTIONS.removeFavorito(ultimoRemovido);
 
         itensList.remove(position);
         notifyItemRemoved(position);
