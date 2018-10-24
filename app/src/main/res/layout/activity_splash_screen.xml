@@ -17,8 +17,8 @@
 
         <ImageView
             android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:src="@drawable/icone"/>
+            android:layout_height="160dp"
+            android:src="@mipmap/ic_launcher"/>
 
     </LinearLayout>
 
@@ -31,9 +31,9 @@
         android:gravity="center|bottom">
 
         <ImageView
-            android:layout_width="80dp"
+            android:layout_width="100dp"
             android:layout_height="80dp"
-            android:src="@drawable/logo_opss"/>
+            android:src="@mipmap/ic_opss"/>
 
     </LinearLayout>
 

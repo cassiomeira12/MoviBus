@@ -22,7 +22,7 @@
         android:layout_height="100dp"
         android:layout_gravity="center"
         android:contentDescription="@string/app_name"
-        android:src="@drawable/icone" />
+        android:src="@mipmap/ic_launcher" />
 
     <ScrollView
         android:layout_width="match_parent"

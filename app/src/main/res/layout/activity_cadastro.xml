@@ -134,9 +134,7 @@
         <com.google.android.gms.common.SignInButton
             android:id="@+id/btn_google_sign"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="singInGoogle">
-
+            android:layout_height="wrap_content">
         </com.google.android.gms.common.SignInButton>
 
     </LinearLayout>
