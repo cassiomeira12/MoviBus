@@ -29,7 +29,7 @@
     <string name="key_notificacoes">key_notificacoes</string>
     <string name="key_localizacao_gps">key_localizacao_gps</string>
     <string name="nome">Nome</string>
-    <string name="pesquisar_">Pesquisar ônibus, linhas, itinerários</string>
+    <string name="pesquisar_">Pesquisar linhas, pontos, itinerários</string>
     <string name="telefone">Telefone</string>
     <string name="senha">Senha</string>
     <string name="email">Email</string>
@@ -54,4 +54,6 @@
     <string name="acordo_cadastro">Ao clicar em Cadastrar eu estou de acordo com os</string>
     <string name="logar">Logar</string>
     <string name="criar_nova_conta">Criar Nova Conta</string>
+    <string name="nome_do_usuario">Nome do Usuario</string>
+    <string name="usuario_email_com">usuario@email.com</string>
 </resources>

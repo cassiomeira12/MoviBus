@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="8dp"
     tools:context=".ui.activity.ConfiguracoesContaActivity">
@@ -23,7 +23,8 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:layout_gravity="center"
-                android:layout_margin="@dimen/activity_vertical_margin">
+                android:layout_margin="16dp"
+                android:onClick="onClick">
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:layout_width="100dp"
@@ -68,6 +69,7 @@
                     android:hint="@string/telefone"
                     android:inputType="date"
                     app:mask="(##)#####-####" />
+
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -95,8 +97,8 @@
                 android:text="@string/trocar_senha" />
 
             <LinearLayout
-                android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:id="@+id/linear_trocar_senha"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -160,35 +162,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginBottom="16dp"
         android:orientation="horizontal">
 
         <ProgressBar
             android:id="@+id/progress"
             android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:visibility="gone" />
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginRight="16dp"/>
 
         <Button
             android:id="@+id/btn_cancelar"
             android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:background="@drawable/button_round_cancelar"
-            android:onClick="onClick"
-            android:layout_marginRight="16dp"
+            android:layout_height="wrap_content"
             android:text="@string/cancelar"
-            android:textColor="@color/cinza" />
+            android:layout_marginRight="16dp"
+            android:background="@drawable/button_round_cancelar"
+            android:textColor="@color/cinza"
+            android:onClick="onClick"/>
 
         <Button
-            android:enabled="false"
             android:id="@+id/btn_salvar"
             android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:background="@drawable/button_round_blue"
-            android:onClick="onClick"
+            android:layout_height="wrap_content"
+            android:enabled="false"
             android:text="@string/salvar"
-            android:textColor="@color/branco" />
+            android:background="@drawable/button_round_blue"
+            android:textColor="@color/branco"
+            android:onClick="onClick"/>
 
     </LinearLayout>
 

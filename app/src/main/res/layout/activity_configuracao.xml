@@ -12,14 +12,28 @@
         android:layout_height="wrap_content"
         android:background="@drawable/view_click"
         android:onClick="onClick"
-        android:orientation="horizontal"
-        android:padding="8dp">
+        android:orientation="horizontal">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/img_perfil"
+        <FrameLayout
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:src="@mipmap/ic_launcher" />
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/activity_vertical_margin">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/view_click"
+                android:src="@color/colorPrimary" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/img_perfil"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/view_click"
+                android:src="@drawable/baseline_account_circle_white_48dp" />
+
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

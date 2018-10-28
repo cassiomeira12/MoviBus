@@ -1,33 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="170dp"
     android:background="@color/bottom_drawer"
     android:gravity="bottom"
     android:padding="16dp"
     android:orientation="vertical"
+    tools:context=".ui.activity.MainActivity"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/img_usuario"
+    <FrameLayout
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_marginTop="16dp"
-        android:src="@drawable/baseline_account_circle_white_48dp"/>
+        android:onClick="abrirTelaConfiguracoesConta"
+        android:src="@drawable/baseline_account_circle_white_48dp">
 
-    <TextView
-        android:id="@+id/txt_nome_usuario"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:text="Nome do Usuario"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/view_click"
+            android:src="@color/colorPrimary" />
 
-    <TextView
-        android:id="@+id/txt_usuario_email"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/img_perfil"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/view_click"
+            android:src="@drawable/baseline_account_circle_white_48dp" />
+
+    </FrameLayout>
+
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="usuario@email.com" />
+        android:orientation="vertical"
+        android:onClick="abrirTelaConfiguracoesConta">
+
+        <TextView
+            android:id="@+id/txt_nome_usuario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/nome_do_usuario"
+            android:textColor="@color/branco"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+        <TextView
+            android:id="@+id/txt_usuario_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/branco"
+            android:text="@string/usuario_email_com" />
+
+    </LinearLayout>
 
 </LinearLayout>

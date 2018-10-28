@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,7 +47,7 @@ public class ConfiguracoesContaActivity extends AppCompatActivity implements Con
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_configuracoes_conta);
+        setContentView(R.layout.activity_configuracoes_conta_2);
         vh = new ViewHolder();
 
         //ativar setinho de voltar
@@ -112,12 +113,13 @@ public class ConfiguracoesContaActivity extends AppCompatActivity implements Con
 
                     vh.btnSalvar.setEnabled(true);
 
-                    Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
-                    Picasso.with(getApplicationContext())
-                            .load(uri)
-                            .placeholder(android.R.drawable.sym_def_app_icon)
-                            .error(android.R.drawable.sym_def_app_icon)
-                            .into(vh.imgPerfil);
+                    ImagemUtils.picassoUserImage(getApplicationContext(), vh.imgPerfil);
+//                    Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
+//                    Picasso.with(getApplicationContext())
+//                            .load(uri)
+//                            .placeholder(android.R.drawable.sym_def_app_icon)
+//                            .error(android.R.drawable.sym_def_app_icon)
+//                            .into(vh.imgPerfil);
                 } else { //falha
                     startActivity(new Intent(getApplicationContext(), LoginActivity.class));
                     Toast.makeText(getApplicationContext(), "Falha de autenticacao", Toast.LENGTH_SHORT).show();

@@ -3,7 +3,6 @@ package com.opss.movibus.ui.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -15,22 +14,21 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.opss.movibus.R;
 import com.opss.movibus.firebase.Firebase;
 import com.opss.movibus.model.Usuario;
+import com.opss.movibus.util.ImagemUtils;
 import com.opss.movibus.util.PermissoesUtils;
 import com.opss.movibus.util.SharedPrefManager;
-import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ConfiguracoesActivity extends AppCompatActivity {
 
-    private CircleImageView perfilImage;
+    private CircleImageView imgPerfil;
     private TextView textNome;
     private TextView textEmail;
 
@@ -42,7 +40,7 @@ public class ConfiguracoesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configuracao);
 
-        this.perfilImage = findViewById(R.id.img_perfil);
+        this.imgPerfil = findViewById(R.id.img_perfil);
         this.textNome = findViewById(R.id.txt_nome);
         this.textEmail = findViewById(R.id.txt_email);
 
@@ -86,12 +84,14 @@ public class ConfiguracoesActivity extends AppCompatActivity {
                     textNome.setText(usuario.getNome());
                     textEmail.setText(usuario.getEmail());
 
-                    Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
-                    Picasso.with(getApplicationContext())
-                            .load(uri)
-                            .placeholder(android.R.drawable.sym_def_app_icon)
-                            .error(android.R.drawable.sym_def_app_icon)
-                            .into(perfilImage);
+                    ImagemUtils.picassoUserImage(getApplicationContext(), imgPerfil);
+//                    Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
+//                    Picasso.with(getApplicationContext())
+//                            .load(uri)
+//                            .placeholder(R.drawable.baseline_account_circle_white_48dp)
+//                            .error(R.drawable.baseline_account_circle_white_48dp)
+//                            .into(imgPerfil);
+
                 } else { //falha
                     startActivity(new Intent(getApplicationContext(), LoginActivity.class));
                     Toast.makeText(getApplicationContext(), "Falha de autenticacao", Toast.LENGTH_SHORT).show();
@@ -147,9 +147,7 @@ public class ConfiguracoesActivity extends AppCompatActivity {
         @Override
         public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            if (requestCode == PermissoesUtils.REQUEST_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {//GPS Location Request
-
-            } else {
+            if (requestCode == PermissoesUtils.REQUEST_LOCATION && grantResults[0] == PackageManager.PERMISSION_DENIED) {//GPS Location Request
                 localizacaoGPSSwitch.setChecked(false);
                 prefManager.setLocationGPS(context, false);
             }

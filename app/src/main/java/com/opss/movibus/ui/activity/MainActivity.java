@@ -2,7 +2,6 @@ package com.opss.movibus.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
@@ -21,12 +20,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,10 +39,9 @@ import com.opss.movibus.model.Linha;
 import com.opss.movibus.model.LinhaFavorita;
 import com.opss.movibus.model.PontoFavorito;
 import com.opss.movibus.model.PontoOnibus;
-import com.opss.movibus.model.Rota;
 import com.opss.movibus.model.Usuario;
 import com.opss.movibus.ui.fragment.MapsFragment;
-import com.squareup.picasso.Picasso;
+import com.opss.movibus.util.ImagemUtils;
 
 import javax.annotation.Nullable;
 
@@ -328,12 +323,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         vh.textNome.setText(USUARIO_LOGADO.getNome());
                         vh.textTelefone.setText(USUARIO_LOGADO.getEmail());
 
-                        Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
-                        Picasso.with(MainActivity.this)
-                                .load(uri)
-                                .placeholder(android.R.drawable.sym_def_app_icon)
-                                .error(android.R.drawable.sym_def_app_icon)
-                                .into(vh.imagemUsuario);
+                        ImagemUtils.picassoUserImage(MainActivity.this, vh.imgPerfil);
+//                        Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
+//                        Picasso.with(MainActivity.this)
+//                                .load(uri)
+//                                .placeholder(R.drawable.baseline_account_circle_white_48dp)
+//                                .error(R.drawable.baseline_account_circle_white_48dp)
+//                                .into(vh.imgPerfil);
 
                     } else { //falha
                         startActivity(new Intent(getApplicationContext(), LoginActivity.class));
@@ -347,12 +343,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             vh.textNome.setText(USUARIO_LOGADO.getNome());
             vh.textTelefone.setText(USUARIO_LOGADO.getEmail());
 
-            Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
-            Picasso.with(MainActivity.this)
-                    .load(uri)
-                    .placeholder(android.R.drawable.sym_def_app_icon)
-                    .error(android.R.drawable.sym_def_app_icon)
-                    .into(vh.imagemUsuario);
+            ImagemUtils.picassoUserImage(MainActivity.this, vh.imgPerfil);
+//            Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
+//            Picasso.with(MainActivity.this)
+//                    .load(uri)
+//                    .placeholder(R.drawable.baseline_account_circle_white_48dp)
+//                    .error(R.drawable.baseline_account_circle_white_48dp)
+//                    .into(vh.imgPerfil);
         }
 
     }
@@ -361,8 +358,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return mapsFragment;
     }
 
+    public void abrirTelaConfiguracoesConta(View view) {
+        startActivity(new Intent(MainActivity.this, ConfiguracoesContaActivity.class));
+    }
+
     public class ViewHolder {
-        public CircleImageView imagemUsuario;
+        public CircleImageView imgPerfil;
         public TextView textNome;
         public TextView textTelefone;
 
@@ -377,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView = findViewById(R.id.menu_lateral);
             navigationView.setNavigationItemSelectedListener(MainActivity.this);
 
-            imagemUsuario = navigationView.getHeaderView(0).findViewById(R.id.img_usuario);
+            imgPerfil = navigationView.getHeaderView(0).findViewById(R.id.img_perfil);
             textNome = navigationView.getHeaderView(0).findViewById(R.id.txt_nome_usuario);
             textTelefone = navigationView.getHeaderView(0).findViewById(R.id.txt_usuario_email);
 

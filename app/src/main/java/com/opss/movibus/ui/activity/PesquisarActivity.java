@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,6 +58,9 @@ public class PesquisarActivity extends AppCompatActivity implements Adapter.Acti
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
 
+    private Toolbar toolbar;
+    private SearchView searchView;
+
     private AdapterPesquisa adapterPesquisa;
 
     @Override
@@ -66,6 +70,9 @@ public class PesquisarActivity extends AppCompatActivity implements Adapter.Acti
 
         recyclerView = findViewById(R.id.recycler_view);
         progressBar = findViewById(R.id.progress);
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         //ativar setinho de voltar
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -86,7 +93,6 @@ public class PesquisarActivity extends AppCompatActivity implements Adapter.Acti
         getMenuInflater().inflate(R.menu.menu_search, menu);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView;
 
         MenuItem menuItem = menu.findItem(R.id.action_search);
         searchView = (SearchView) menuItem.getActionView();
@@ -94,6 +100,10 @@ public class PesquisarActivity extends AppCompatActivity implements Adapter.Acti
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setQueryHint(getResources().getString(R.string.pesquisar_));
         searchView.setOnQueryTextListener(new TextQueryListener());
+
+//        toolbar.setOnClickListener((OnClickListener) -> {
+//            searchView.onActionViewExpanded();
+//        });
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -169,6 +179,7 @@ public class PesquisarActivity extends AppCompatActivity implements Adapter.Acti
             pesquisa(newText);
             return true;
         }
+
     }
 
     private class BuscarDados {

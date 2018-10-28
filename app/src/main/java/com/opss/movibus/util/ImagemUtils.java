@@ -1,6 +1,7 @@
 package com.opss.movibus.util;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,7 +19,9 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.opss.movibus.R;
+import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,6 +30,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by pedro on 29/08/17.
@@ -372,5 +377,14 @@ public class ImagemUtils {
 
         //converte o byteArray64 para string
         return Base64.encodeToString(b, Base64.DEFAULT);
+    }
+
+    public static void picassoUserImage(Context context, CircleImageView perfilImage) {
+        Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
+        Picasso.with(context)
+                .load(uri)
+                .placeholder(R.drawable.baseline_account_circle_white_48dp)
+                .error(R.drawable.baseline_account_circle_white_48dp)
+                .into(perfilImage);
     }
 }
