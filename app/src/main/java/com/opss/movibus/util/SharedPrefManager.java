@@ -109,8 +109,6 @@ public class SharedPrefManager {
         return sharedPreferences.getString("PHOTO", null);
     }
 
-
-
     public void clear(){
         editor.clear();
         editor.apply();

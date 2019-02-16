@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Gravity;
@@ -322,14 +323,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         USUARIO_LOGADO = usuario;
                         vh.textNome.setText(USUARIO_LOGADO.getNome());
                         vh.textTelefone.setText(USUARIO_LOGADO.getEmail());
-
                         ImagemUtils.picassoUserImage(MainActivity.this, vh.imgPerfil);
-//                        Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
-//                        Picasso.with(MainActivity.this)
-//                                .load(uri)
-//                                .placeholder(R.drawable.baseline_account_circle_white_48dp)
-//                                .error(R.drawable.baseline_account_circle_white_48dp)
-//                                .into(vh.imgPerfil);
 
                     } else { //falha
                         startActivity(new Intent(getApplicationContext(), LoginActivity.class));
@@ -342,14 +336,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             vh.textNome.setText(USUARIO_LOGADO.getNome());
             vh.textTelefone.setText(USUARIO_LOGADO.getEmail());
-
             ImagemUtils.picassoUserImage(MainActivity.this, vh.imgPerfil);
-//            Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
-//            Picasso.with(MainActivity.this)
-//                    .load(uri)
-//                    .placeholder(R.drawable.baseline_account_circle_white_48dp)
-//                    .error(R.drawable.baseline_account_circle_white_48dp)
-//                    .into(vh.imgPerfil);
         }
 
     }
@@ -371,8 +358,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public TextView txtFiltro;
 
         public DrawerLayout drawerLayout;//Drawer MenuLateral
-
         public NavigationView navigationView;
+        public FloatingActionButton locationButton;
 
         public ViewHolder() {
             navigationView = findViewById(R.id.menu_lateral);
@@ -390,6 +377,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             txtFiltro = toolbarPesquisa.findViewById(R.id.text_filtro);
 
             drawerLayout = findViewById(R.id.drawer_layout);
+            locationButton = findViewById(R.id.locationBtn);
 
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(MainActivity.this, drawerLayout, toolbarPrincipal, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
             drawerLayout.addDrawerListener(toggle);
@@ -401,6 +389,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     appDrawer.close();
                 }
             });
+            locationButton.setOnClickListener((OnClickListener) -> mapsFragment.onMyLocation() );
         }
     }
 }

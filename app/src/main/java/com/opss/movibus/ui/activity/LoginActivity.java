@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken("30153669459-59h39023tinom0ilp8t23dq0oovg4jld.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -206,7 +206,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void recuperarSenha() {
+    public void recuperarSenha(View view) {
         //Verificando se o Email esta vazio
         if (TextUtils.isEmpty(viewHolder.emailText.getText().toString())) {
             Snackbar.make(getCurrentFocus(), "Informe o email", Snackbar.LENGTH_SHORT).show();
@@ -240,7 +240,6 @@ public class LoginActivity extends AppCompatActivity {
 
         private final MaterialEditText emailText;
         private final MaterialEditText senhaText;
-        private final TextView recuperarSenha;
 
         private final Button btnCadastrar, btnLogar;
         private final SignInButton googleButton;
@@ -248,7 +247,6 @@ public class LoginActivity extends AppCompatActivity {
         public ViewHolder() {
             emailText = findViewById(R.id.email_text);
             senhaText = findViewById(R.id.senha_text);
-            recuperarSenha = findViewById(R.id.recuperar_senha);
 
             btnCadastrar = findViewById(R.id.btn_cadastrar);
             btnLogar = findViewById(R.id.btn_logar);
@@ -258,7 +256,6 @@ public class LoginActivity extends AppCompatActivity {
 
             googleButton.setOnClickListener((OnClickListener) -> signInGoogle());
             btnCadastrar.setOnClickListener((OnClickListener) -> startActivity(new Intent(LoginActivity.this, CadastroActivity.class)));
-            recuperarSenha.setOnClickListener((OnClickListener) -> recuperarSenha() );
         }
 
     }

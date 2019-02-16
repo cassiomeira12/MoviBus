@@ -89,12 +89,12 @@
                     android:layout_height="wrap_content"
                     android:text="Origem da Linha"
                     android:textColor="@android:color/white"
-                    android:textSize="20dp" />
+                    android:textSize="20sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="right"
+                    android:gravity="end"
                     android:orientation="horizontal">
 
                     <ImageView
@@ -125,7 +125,7 @@
                     android:layout_height="wrap_content"
                     android:text="Destino da Linha"
                     android:textColor="@android:color/white"
-                    android:textSize="20dp" />
+                    android:textSize="20sp" />
 
             </LinearLayout>
 
@@ -140,7 +140,7 @@
                     android:layout_height="wrap_content"
                     android:text="Via Ponto de Referência"
                     android:textColor="@android:color/white"
-                    android:textSize="20dp" />
+                    android:textSize="20sp" />
 
             </LinearLayout>
 
@@ -149,7 +149,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="@color/favorito_verde"
+                android:background="@color/favorito_verde"
                 android:text="Acompanahar Ônibus"
                 android:textColor="@android:color/white" />
 
@@ -158,7 +158,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:backgroundTint="@color/favorito_verde"
+                android:background="@color/favorito_verde"
                 android:text="Ver Itinerário"
                 android:textColor="@android:color/white" />
 
@@ -184,16 +184,16 @@
                     android:gravity="left|center"
                     android:text="Endereço do Ponto de Ônibus"
                     android:textColor="@android:color/white"
-                    android:textSize="20dp" />
+                    android:textSize="20sp" />
 
                 <TextView
                     android:id="@+id/text_coberto"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="right"
+                    android:gravity="end"
                     android:text="Coberto"
                     android:textColor="@android:color/white"
-                    android:textSize="20dp" />
+                    android:textSize="20sp" />
 
             </LinearLayout>
 

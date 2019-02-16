@@ -13,6 +13,8 @@ public class Usuario implements Serializable {
     private String id;
     private String nome;
     private String telefone;
+    //Utilizando o Firebase não precisa armazenar Email e Senha
+    //Porque eles ficam armazenados no Authentication
     private String email;
     private String senha;
 

@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -52,6 +53,7 @@ import com.opss.movibus.model.PontoFavorito;
 import com.opss.movibus.model.PontoOnibus;
 import com.opss.movibus.ui.activity.BottomDrawer;
 import com.opss.movibus.ui.activity.MainActivity;
+import com.opss.movibus.ui.dialog.ConfirmarDialog;
 import com.opss.movibus.ui.fragment.marker.OnibusMarker;
 import com.opss.movibus.ui.fragment.marker.PontoMarker;
 import com.opss.movibus.util.PermissoesUtils;
@@ -61,7 +63,7 @@ import static android.content.Context.LOCATION_SERVICE;
 
 
 public class MapsFragment extends SupportMapFragment implements OnMapReadyCallback, LocationListener,
-        GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
 
     private MainActivity activity;
     private GoogleMap mMap;
@@ -120,7 +122,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
         if (new SharedPrefManager(getContext()).getLocationGPS()) {
             if (PermissoesUtils.resquestLocationPermission(getContext())) {//Verificando as permissoes de acesso ao GPS
-                mMap.setMyLocationEnabled(true);
+                activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
                 locationManager2();
             } else {
                 PermissoesUtils.verificarPermissaoLocation(activity, getContext());//Solicitando acesso ao GPS
@@ -134,7 +136,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         mMap.setMaxZoomPreference(ZOOM_MAX);//Setando ZOM maximo
         mMap.moveCamera(CameraUpdateFactory.newLatLng(centroConquista));//Movendo a camera para o centro de Conquista
 
-        mMap.setOnMyLocationButtonClickListener(this);//Action do MyLocationButton
+        //mMap.setOnMyLocationButtonClickListener(this);//Action do MyLocationButton
         mMap.setOnMapClickListener(this);//Action ao clicar sobre o Mapa
         mMap.setOnMarkerClickListener(this);//Action ao clicar sobre o Marker
 
@@ -142,7 +144,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         mMap.setIndoorEnabled(false);
         mMap.setBuildingsEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        mMap.getUiSettings().setZoomControlsEnabled(true);//Habilitando controle de Zoom
+        //mMap.getUiSettings().setZoomControlsEnabled(true);//Habilitando controle de Zoom
 
         COLLECTIONS = new CollectionFirebase();
     }
@@ -155,11 +157,13 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
             if (permissions.length > 0 && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION) && permissions[1].equals(Manifest.permission.ACCESS_COARSE_LOCATION)) {
                 Snackbar.make(getView(), "GPS Conectado", Snackbar.LENGTH_LONG).show();
                 locationManager2();
-                mMap.setMyLocationEnabled(true);
+                //mMap.setMyLocationEnabled(true);
+                activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
             }
         } else {
             Snackbar.make(getView(), "GPS Desconectado", Snackbar.LENGTH_LONG).show();
             new SharedPrefManager(getContext()).setLocationGPS(getContext(), false);
+            activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_not_fixed_24);
         }
 
     }
@@ -192,8 +196,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(intent);
             }
-
-
 
             if (locationManager == null) {
                 locationManager2();
@@ -236,10 +238,25 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         }
     }
 
-    @Override
-    public boolean onMyLocationButtonClick() {
-        iniciarLocalizacao2();
-        return true;
+    public void onMyLocation() {
+        if (new SharedPrefManager(getContext()).getLocationGPS()) {
+            if (PermissoesUtils.resquestLocationPermission(getContext())) {//Verificando as permissoes de acesso ao GPS
+                locationManager2();
+                iniciarLocalizacao2();
+                activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
+            } else {
+                PermissoesUtils.verificarPermissaoLocation(activity, getContext());//Solicitando acesso ao GPS
+            }
+        } else {
+            new SharedPrefManager(getContext()).setLocationGPS(getContext(), true);
+            if (PermissoesUtils.resquestLocationPermission(getContext())) {
+                activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
+                Snackbar.make(getView(), "GPS Conectado", Snackbar.LENGTH_LONG).show();
+                iniciarLocalizacao2();
+            } else {
+                PermissoesUtils.verificarPermissaoLocation(activity, getContext());//Solicitando acesso ao GPS
+            }
+        }
     }
 
     @Override
@@ -480,11 +497,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     }
 
     private void adicionarPontoMapa(LatLng latLng) {
-//        Ponto ponto = new Ponto();
-//        ponto.setIdentificador(latLng.toString());
-//        ponto.setLatitude(latLng.latitude);
-//        ponto.setLongitude(latLng.longitude);
-
 //        String id = dataBase.collection(PontoOnibus.COLECAO).document().getId();
 //
 //        PontoOnibus ponto = new PontoOnibus();
@@ -532,7 +544,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
             progressBar = activity.findViewById(R.id.progress);
 
-            //getLinhaFavoritaCollections();
+            getLinhaFavoritaCollections();
             getPontoFavoritoCollections();
             getLinhaOnibusCollections();
             getPontoOnibusCollections();

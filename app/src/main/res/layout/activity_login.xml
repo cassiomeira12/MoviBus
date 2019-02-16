@@ -54,12 +54,14 @@
                 app:met_singleLineEllipsis="true"
                 app:met_floatingLabel="highlight"/>
 
-            <TextView
-                android:id="@+id/recuperar_senha"
+            <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:textSize="14sp"
+                style="?attr/buttonBarButtonStyle"
+                android:textColor="@color/buttonCadastrar"
+                android:onClick="recuperarSenha"
                 android:text="@string/recuperar_senha"/>
 
             <Button
@@ -98,11 +100,12 @@
             <Button
                 android:id="@+id/btn_cadastrar"
                 android:layout_marginTop="8dp"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
+                android:padding="8dp"
+                style="?attr/buttonBarButtonStyle"
+                android:textColor="@color/buttonCadastrar"
                 android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:text="@string/criar_nova_conta"
-                android:textColor="@color/buttonCadastrar" />
+                android:text="@string/criar_nova_conta"/>
 
         </LinearLayout>
 

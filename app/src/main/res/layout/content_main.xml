@@ -6,8 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".ui.activity.MainActivity">
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -90,6 +89,16 @@
             </LinearLayout>
 
         </android.support.v7.widget.Toolbar>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/locationBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            style="?attr/buttonBarButtonStyle"
+            android:src="@drawable/baseline_gps_not_fixed_black_24"
+            android:layout_marginBottom="16dp"
+            android:layout_marginRight="10dp"/>
 
     </FrameLayout>
 

@@ -112,14 +112,8 @@ public class ConfiguracoesContaActivity extends AppCompatActivity implements Con
                     vh.edtTelefone.setText(usuario.getTelefone());
 
                     vh.btnSalvar.setEnabled(true);
-
                     ImagemUtils.picassoUserImage(getApplicationContext(), vh.imgPerfil);
-//                    Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
-//                    Picasso.with(getApplicationContext())
-//                            .load(uri)
-//                            .placeholder(android.R.drawable.sym_def_app_icon)
-//                            .error(android.R.drawable.sym_def_app_icon)
-//                            .into(vh.imgPerfil);
+
                 } else { //falha
                     startActivity(new Intent(getApplicationContext(), LoginActivity.class));
                     Toast.makeText(getApplicationContext(), "Falha de autenticacao", Toast.LENGTH_SHORT).show();
@@ -146,16 +140,17 @@ public class ConfiguracoesContaActivity extends AppCompatActivity implements Con
                 });
             }
         }).start();
-
-
     }
 
     public void onClick(View view) {
         String[] request = new String[]{
-                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
         };
 
         switch (view.getId()) {
+
             case R.id.img_perfil:
                 if (verificarPermissoes())
                     ImagemUtils.buscarImagem(this, "perfil.jpg");
