@@ -35,7 +35,6 @@ public class ReverseGeo extends AsyncTask<LatLng, Void, String> {
 
     @Override
     protected String doInBackground(LatLng... latLngs) {
-
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
 
         LatLng location = latLngs[0];

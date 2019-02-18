@@ -2,27 +2,21 @@ package com.opss.movibus.ui.fragment;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import com.firebase.geofire.GeoFire;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,14 +24,18 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +44,7 @@ import com.opss.movibus.R;
 import com.opss.movibus.firebase.Firebase;
 import com.opss.movibus.location.camera.Acompanhar;
 import com.opss.movibus.location.camera.NaoAcompanhar;
+import com.opss.movibus.model.Coordenada;
 import com.opss.movibus.model.Linha;
 import com.opss.movibus.model.LinhaFavorita;
 import com.opss.movibus.model.Onibus;
@@ -53,7 +52,6 @@ import com.opss.movibus.model.PontoFavorito;
 import com.opss.movibus.model.PontoOnibus;
 import com.opss.movibus.ui.activity.BottomDrawer;
 import com.opss.movibus.ui.activity.MainActivity;
-import com.opss.movibus.ui.dialog.ConfirmarDialog;
 import com.opss.movibus.ui.fragment.marker.OnibusMarker;
 import com.opss.movibus.ui.fragment.marker.PontoMarker;
 import com.opss.movibus.util.PermissoesUtils;
@@ -123,6 +121,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         if (new SharedPrefManager(getContext()).getLocationGPS()) {
             if (PermissoesUtils.resquestLocationPermission(getContext())) {//Verificando as permissoes de acesso ao GPS
                 activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
+                mMap.setMyLocationEnabled(true);
                 locationManager2();
             } else {
                 PermissoesUtils.verificarPermissaoLocation(activity, getContext());//Solicitando acesso ao GPS
@@ -347,7 +346,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
     @Override
     public void onProviderEnabled(String s) {
-
+        //Snackbar.make(getView(), "GPS Conectado", Snackbar.LENGTH_LONG).show();
     }
 
     @Override
@@ -388,51 +387,42 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     }
 
     public void verItinerario(Onibus onibus) {
-        List<LatLng> decodedPath = null;
+        if (onibus.getLinha() == null) {
+            return;
+        }
 
-//        Firebase.get().getFireRota().getCollection().document(onibus.getLinha().getIdRotaIda()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//            @Override
-//            public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                Rota rota = documentSnapshot.toObject(Rota.class);
-//                for (LatLng latLng : rota.getCoordenadas()) {
-//                    decodedPath.add(latLng);
-//                }
-//                mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.GRAY));
-//            }
-//        });
+        Firebase.get().getFireRota().getCollectionCoordenadas(onibus.getLinha().getIdRotaIda()).orderBy("numero", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                List<Coordenada> teste = queryDocumentSnapshots.toObjects(Coordenada.class);
 
+                List<LatLng> decodedPath = new ArrayList<>();
 
-        //        Firebase.get().getFireRota().getCollection().document(onibus.getLinha().getIdRotaIda()).get("coordenadas").addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                if (task.isComplete()) {
-//                    for (QueryDocumentSnapshot doc : task.getResult()) {
-//                        LatLng l1 = doc.toObject(LatLng.class);
-//                        decodedPath.add(l1);
-//                        Log.i("CASSIO", "aqui");
-//                    }
-//                    //mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.GRAY));
-//                }
-//            }
-//        });
+                for (Coordenada co : teste) {
+                    decodedPath.add(new LatLng(co.latitude, co.longitude));
+                }
 
-//        Firebase.get().getFireRota().getCollection().document(onibus.getLinha().getIdRotaIda()).collection("coordenadas").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-//            @Override
-//            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-//
-//            }
-//        }).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//            @Override
-//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//
-//            }
-//        });
+                Polyline poly = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.GREEN));
+                //poly.remove();
+            }
+        });
 
+        Firebase.get().getFireRota().getCollectionCoordenadas(onibus.getLinha().getIdRotaVolta()).orderBy("numero", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                List<Coordenada> teste = queryDocumentSnapshots.toObjects(Coordenada.class);
 
-//        decodedPath.add(new LatLng(0,0)); // latitude e longitude
-//        decodedPath.add(new LatLng(1,1)); // latitude e longitude
-//        decodedPath.add(new LatLng(2,2)); // latitude e longitude
-//        mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.GRAY));
+                List<LatLng> decodedPath = new ArrayList<>();
+
+                for (Coordenada co : teste) {
+                    decodedPath.add(new LatLng(co.latitude, co.longitude));
+                }
+
+                Polyline poly = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.BLUE));
+                //poly.remove();
+            }
+        });
+
     }
 
     public void mostrarTodosOsOnibus() {
@@ -622,6 +612,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
                             onibus.setMarker(marker);//Adicionando o marker ao Objeto Onibus
                         }
+
                         progressBar.setVisibility(View.GONE);
                     }
                 }

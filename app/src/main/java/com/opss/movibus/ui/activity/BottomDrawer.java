@@ -135,7 +135,7 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
         imgElevador = bottomDrawer.findViewById(R.id.img_elevador);
         acompanharButton = bottomDrawer.findViewById(R.id.acompanharButton);
         itinerarioButton = bottomDrawer.findViewById(R.id.itinerarioButton);
-        itinerarioButton.setVisibility(View.GONE);
+        //itinerarioButton.setVisibility(View.GONE);
 
         //Layout Ponto
         linearPonto = bottomDrawer.findViewById(R.id.linearPonto);

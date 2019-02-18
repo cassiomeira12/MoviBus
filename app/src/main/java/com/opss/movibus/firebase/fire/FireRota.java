@@ -4,6 +4,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.opss.movibus.firebase.IFirebase;
+import com.opss.movibus.model.Coordenada;
 import com.opss.movibus.model.Rota;
 
 public class FireRota implements IFirebase<Rota> {
@@ -33,4 +34,13 @@ public class FireRota implements IFirebase<Rota> {
     public void updateDocument(Rota document) {
 
     }
+
+    public CollectionReference getCollectionCoordenadas(String idRota) {
+        return collection.document(idRota).collection(Rota.COORDENADAS);
+    }
+
+    public void setCoodenada(String idRota, Coordenada coordenada) {
+        getCollectionCoordenadas(idRota).document(String.valueOf(coordenada.numero)).set(coordenada);
+    }
+
 }
