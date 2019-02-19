@@ -44,6 +44,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:16.0.1'//Authentication
     implementation 'com.google.firebase:firebase-firestore:18.0.0'//Firestore
     implementation 'com.firebase:geofire-android:2.1.2'//Biblioteca para Geo Localizacao
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'//Firebase Cloud Messaging
+    implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
     //Program type already present: android.arch.core.util.Function
     implementation "android.arch.core:runtime:1.1.1"

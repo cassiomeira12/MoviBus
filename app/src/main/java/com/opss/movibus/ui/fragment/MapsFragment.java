@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -63,11 +64,12 @@ import static android.content.Context.LOCATION_SERVICE;
 public class MapsFragment extends SupportMapFragment implements OnMapReadyCallback, LocationListener,
         GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
 
+    public static final String TAG = "MapsFragment";
+
     private MainActivity activity;
     private GoogleMap mMap;
 
     private LocationManager locationManager;
-    private Location mLastLocation;
     private static final long MIN_DISTANCE_FOR_UPDATE = 10;
     private static final long MIN_TIME_FOR_UPDATE = 1000 * 60 * 2;
 
@@ -97,11 +99,16 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume");
         if (new SharedPrefManager(getContext()).getLocationGPS() && PermissoesUtils.resquestLocationPermission(getContext())) {
-            if (mMap != null) {
-                mMap.setMyLocationEnabled(true);
+            if (PermissoesUtils.resquestLocationPermission(getContext())) {
+                if (verificarGPSLigado()) {
+                    if (mMap != null) {
+                        mMap.setMyLocationEnabled(true);
+                        locationManager2();
+                    }
+                }
             }
-            locationManager2();
         } else {
             pararLocalizacaoGPS();
         }
@@ -121,8 +128,10 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         if (new SharedPrefManager(getContext()).getLocationGPS()) {
             if (PermissoesUtils.resquestLocationPermission(getContext())) {//Verificando as permissoes de acesso ao GPS
                 activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
-                mMap.setMyLocationEnabled(true);
-                locationManager2();
+                if (verificarGPSLigado()) {
+                    mMap.setMyLocationEnabled(true);
+                    locationManager2();
+                }
             } else {
                 PermissoesUtils.verificarPermissaoLocation(activity, getContext());//Solicitando acesso ao GPS
             }
@@ -151,89 +160,52 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     @SuppressLint("MissingPermission")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
         if (requestCode == PermissoesUtils.REQUEST_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {//GPS Location Request
             if (permissions.length > 0 && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION) && permissions[1].equals(Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                Snackbar.make(getView(), "GPS Conectado", Snackbar.LENGTH_LONG).show();
+                //activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
                 locationManager2();
-                //mMap.setMyLocationEnabled(true);
-                activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
             }
         } else {
-            Snackbar.make(getView(), "GPS Desconectado", Snackbar.LENGTH_LONG).show();
             new SharedPrefManager(getContext()).setLocationGPS(getContext(), false);
             activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_not_fixed_24);
+            //Snackbar.make(getView(), "GPS Desativado", Snackbar.LENGTH_LONG).show();
         }
+    }
 
+    private boolean verificarGPSLigado() {
+        //Verificar se o GPS do dispositivo esta ligado
+        LocationManager service = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+        return service.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
     @SuppressLint("MissingPermission")
     private void locationManager2() {
-        //Localizacao via GPS
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_FOR_UPDATE, MIN_DISTANCE_FOR_UPDATE, this);
-        //Localizacao via INTERNET
-        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_FOR_UPDATE, MIN_DISTANCE_FOR_UPDATE, this);
-
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            mLastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            //Toast.makeText(activity, "GPS Provider", Toast.LENGTH_SHORT).show();
-            return;
-        }
-    }
-
-    public void iniciarLocalizacao2() {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            //String locationProviders = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS);
-
-            LocationManager service = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-            boolean enabled = service.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-            // Check if enabled and if not send user to the GPS settings
-            if (!enabled) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-
-            if (locationManager == null) {
-                locationManager2();
-            }
+        if (!verificarGPSLigado()) {//Verifica se o GPS esta ligado
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(intent);//Inicia a tela de configuracao do GPS
+        } else {//GPS Ligado
+            activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
+            //Snackbar.make(getView(), "GPS Ativado", Snackbar.LENGTH_LONG).show();
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_FOR_UPDATE, MIN_DISTANCE_FOR_UPDATE, this);
 
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                mLastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                if (mLastLocation != null) {
-                    moveCamera(mLastLocation, ZOOM_MAX);
+                Location lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                if (lastLocation != null) {
+                    moveCamera(lastLocation, ZOOM_MAX);
                 }
-                return;
             }
-
-            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                mLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                if (mLastLocation != null) {
-                    moveCamera(mLastLocation, ZOOM_MAX);
-                }
-                return;
-            }
-
-        } else {
-
         }
     }
 
+    @SuppressLint("MissingPermission")
     public void pararLocalizacaoGPS() {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
+        if (PermissoesUtils.resquestLocationPermission(getContext())) {
             if (locationManager != null) {
-                locationManager.removeUpdates(this);//Removendo a localizacao do GPS
+                locationManager.removeUpdates(this);
             }
-
             if (mMap != null) {
                 mMap.setMyLocationEnabled(false);
             }
-
-            mLastLocation = null;
         }
     }
 
@@ -241,17 +213,16 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         if (new SharedPrefManager(getContext()).getLocationGPS()) {
             if (PermissoesUtils.resquestLocationPermission(getContext())) {//Verificando as permissoes de acesso ao GPS
                 locationManager2();
-                iniciarLocalizacao2();
-                activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
             } else {
                 PermissoesUtils.verificarPermissaoLocation(activity, getContext());//Solicitando acesso ao GPS
             }
         } else {
             new SharedPrefManager(getContext()).setLocationGPS(getContext(), true);
             if (PermissoesUtils.resquestLocationPermission(getContext())) {
-                activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
-                Snackbar.make(getView(), "GPS Conectado", Snackbar.LENGTH_LONG).show();
-                iniciarLocalizacao2();
+                //activity.vh.locationButton.setImageResource(R.drawable.baseline_gps_fixed_24);
+                //Snackbar.make(getView(), "GPS Conectado", Snackbar.LENGTH_LONG).show();
+                //locationManager2();
+                //iniciarLocalizacao2();
             } else {
                 PermissoesUtils.verificarPermissaoLocation(activity, getContext());//Solicitando acesso ao GPS
             }
