@@ -82,7 +82,7 @@
                 android:text="ou acesse usando:"/>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="8dp"
@@ -90,7 +90,7 @@
 
                 <com.google.android.gms.common.SignInButton
                     android:id="@+id/btn_google_sign"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                 </com.google.android.gms.common.SignInButton>

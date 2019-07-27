@@ -8,7 +8,9 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,11 +24,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.SquareCap;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.EventListener;
@@ -51,6 +55,7 @@ import com.opss.movibus.model.LinhaFavorita;
 import com.opss.movibus.model.Onibus;
 import com.opss.movibus.model.PontoFavorito;
 import com.opss.movibus.model.PontoOnibus;
+import com.opss.movibus.model.Rota;
 import com.opss.movibus.ui.activity.BottomDrawer;
 import com.opss.movibus.ui.activity.MainActivity;
 import com.opss.movibus.ui.fragment.marker.OnibusMarker;
@@ -124,6 +129,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.mMap = googleMap;
+        Log.d(TAG, "onMapReady");
 
         if (new SharedPrefManager(getContext()).getLocationGPS()) {
             if (PermissoesUtils.resquestLocationPermission(getContext())) {//Verificando as permissoes de acesso ao GPS
@@ -227,6 +233,22 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
                 PermissoesUtils.verificarPermissaoLocation(activity, getContext());//Solicitando acesso ao GPS
             }
         }
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (onibusAcompanhando != null) {
+                    Rota rota = onibusAcompanhando.getOnibus().getLinha().getRotaIDA();
+                    Marker marker = onibusAcompanhando.getMarker();
+                    //for (Coordenada co : rota.getCoordenadas()) {
+                        //Log.d(TAG, "run: " + co.toString());
+                        marker.setPosition(new LatLng(-14.86410466, -40.81881584));
+                        //onibusAcompanhando.getMarker().setPosition(new LatLng(co.latitude, co.longitude));
+                        //SystemClock.sleep(100);
+                    //}
+                }
+            }
+        });
     }
 
     @Override
@@ -255,7 +277,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         if (marker.getTag() instanceof Onibus) {
             Onibus onibusSelecionado = (Onibus) marker.getTag();
             marker.showInfoWindow();
-            moveCamera(marker.getPosition(), ZOOM_SELECT);
+            //moveCamera(marker.getPosition(), ZOOM_SELECT);
 
             if (onibusAcompanhando != null) {
                 if (onibusAcompanhando.getOnibus().getId().equals(onibusSelecionado.getId())) {
@@ -263,7 +285,10 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
                 }
             }
 
-            appDrawer.abrir(onibusSelecionado, marker);
+            onibusAcompanhando = onibusSelecionado.getMarker();
+
+            //appDrawer.abrir(onibusSelecionado, marker);
+            verItinerario(onibusSelecionado);
 
             LinhaFavorita linhaFavorita = COLLECTIONS.linhasFavoritas.get(onibusSelecionado.getIdLinha());
             if (linhaFavorita != null) {
@@ -369,6 +394,10 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
                 List<LatLng> decodedPath = new ArrayList<>();
 
+                Rota rota = new Rota();
+                rota.setCoordenadas(teste);
+                onibus.getLinha().setRotaIDA(rota);
+
                 for (Coordenada co : teste) {
                     decodedPath.add(new LatLng(co.latitude, co.longitude));
                 }
@@ -385,11 +414,23 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
                 List<LatLng> decodedPath = new ArrayList<>();
 
+                Rota rota = new Rota();
+                rota.setCoordenadas(teste);
+                onibus.getLinha().setRotaVolta(rota);
+
                 for (Coordenada co : teste) {
                     decodedPath.add(new LatLng(co.latitude, co.longitude));
                 }
 
-                Polyline poly = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.BLUE));
+                PolylineOptions polyOptions = new PolylineOptions();
+                polyOptions.color(Color.BLUE);
+                polyOptions.width(5);
+                polyOptions.startCap(new SquareCap());
+                polyOptions.endCap(new SquareCap());
+                polyOptions.jointType(JointType.ROUND);
+                polyOptions.addAll(decodedPath);
+
+                Polyline poly = mMap.addPolyline(polyOptions);
                 //poly.remove();
             }
         });
@@ -577,7 +618,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
                             }
 
                             OnibusMarker marker = new OnibusMarker(onibus);//Criando Marker do Onibus
-                            marker.setDocumentReference(doc.getReference());//Adicionando Referencia do Documento
+                            //marker.setDocumentReference(doc.getReference());//Adicionando Referencia do Documento
                             marker.getMarker(mMap);//Adicionando Marker no Google Maps
                             marker.getMarker().setTag(onibus);//Adicionando o Onibus como Tag no Marker
 

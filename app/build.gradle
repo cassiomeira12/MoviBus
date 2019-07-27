@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.opss.movibus"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -40,9 +40,10 @@ dependencies {
 
     //Firebase
     implementation 'com.google.firebase:firebase-core:16.0.7'//Firebase
-    implementation 'com.google.firebase:firebase-auth:16.1.0'//Authentication
+    implementation 'com.google.firebase:firebase-auth:17.0.0'//Authentication
     implementation 'com.google.android.gms:play-services-auth:16.0.1'//Authentication
-    implementation 'com.google.firebase:firebase-firestore:18.0.0'//Firestore
+    implementation 'com.google.firebase:firebase-firestore:18.0.0'//Firestore Database
+    implementation 'com.google.firebase:firebase-database:17.0.0'//Realtime Database
     implementation 'com.firebase:geofire-android:2.1.2'//Biblioteca para Geo Localizacao
     implementation 'com.google.firebase:firebase-messaging:17.3.4'//Firebase Cloud Messaging
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
@@ -61,7 +62,7 @@ dependencies {
     implementation 'uk.co.chrisjenx:calligraphy:2.3.0'//Utilizado para adicionar fonts
     implementation 'com.github.d-max:spots-dialog:0.7@aar'//AlertDialog
     //implementation 'com.github.glomadrian:MaterialAnimatedSwitch:1.1@arr'//Material Switch
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.squareup.picasso:picasso:2.5.2'

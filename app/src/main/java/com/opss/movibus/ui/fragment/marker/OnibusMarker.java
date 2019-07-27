@@ -1,6 +1,13 @@
 package com.opss.movibus.ui.fragment.marker;
 
+import android.support.annotation.NonNull;
+
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -13,9 +20,10 @@ import com.opss.movibus.location.camera.Camera;
 import com.opss.movibus.location.camera.NaoAcompanhar;
 import com.opss.movibus.model.Onibus;
 
-public class OnibusMarker extends MarkerObjetct implements EventListener<DocumentSnapshot> {
+public class OnibusMarker extends MarkerObjetct implements EventListener<DocumentSnapshot>, ValueEventListener {
 
-    private DocumentReference documentReference;
+    private DocumentReference documentReference;//Firestore Database
+    private DatabaseReference documentReference2;//Realtime Database
     private Onibus onibus;//Referencia ao objeto Ponto de Onibus
 
     private Camera camera = new NaoAcompanhar();
@@ -33,6 +41,25 @@ public class OnibusMarker extends MarkerObjetct implements EventListener<Documen
         if (onibus.getLinha() != null) {
             super.markerOptions.title(onibus.getLinha().getNome());
         }
+
+        documentReference2 = FirebaseDatabase.getInstance().getReference("onibus").child(onibus.getId());
+        documentReference2.addValueEventListener(this);
+    }
+
+    @Override
+    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        double lat = dataSnapshot.child("latitude").getValue(Double.class);
+        double lon = dataSnapshot.child("longitude").getValue(Double.class);
+
+        LatLng localizacao = new LatLng(lat, lon);
+
+        this.marker.setPosition(localizacao);
+        this.camera.camera(localizacao);
+    }
+
+    @Override
+    public void onCancelled(@NonNull DatabaseError databaseError) {
+
     }
 
     @Override
@@ -73,4 +100,5 @@ public class OnibusMarker extends MarkerObjetct implements EventListener<Documen
     public Onibus getOnibus() {
         return onibus;
     }
+
 }

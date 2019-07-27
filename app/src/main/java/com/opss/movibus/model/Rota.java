@@ -30,6 +30,7 @@ public class Rota implements Serializable {
 
     public Rota(String id) {
         this.id = id;
+        this.coordenadas = new ArrayList<>();
     }
 
     public String getId() {
@@ -40,13 +41,13 @@ public class Rota implements Serializable {
         this.id = id;
     }
 
-//    public List<GeoPoint> getCoordenadas() {
-//        return coordenadas;
-//    }
+    public List<Coordenada> getCoordenadas() {
+        return coordenadas;
+    }
 
-//    public void setCoordenadas(List<GeoPoint> coordenadas) {
-//        this.coordenadas = coordenadas;
-//    }
+    public void setCoordenadas(List<Coordenada> coordenadas) {
+        this.coordenadas = coordenadas;
+    }
 
 //    public Map<String, PontoOnibus> getPontosOnibus() {
 //        return pontosOnibus;

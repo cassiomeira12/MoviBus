@@ -1,11 +1,8 @@
 package com.opss.movibus.model;
 
-import android.util.Log;
-
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Exclude;
-
 import com.opss.movibus.firebase.Firebase;
 import com.opss.movibus.ui.fragment.marker.OnibusMarker;
 
