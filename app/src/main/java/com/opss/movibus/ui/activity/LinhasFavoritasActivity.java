@@ -2,16 +2,15 @@ package com.opss.movibus.ui.activity;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.view.View;
 import android.widget.LinearLayout;
 
 import com.opss.movibus.R;
-import com.opss.movibus.model.Linha;
 import com.opss.movibus.model.LinhaFavorita;
 import com.opss.movibus.ui.adapter.Adapter;
 import com.opss.movibus.ui.adapter.AdapterLinha;

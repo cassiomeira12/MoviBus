@@ -1,6 +1,6 @@
 package com.opss.movibus.ui.fragment.marker;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;

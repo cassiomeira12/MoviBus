@@ -3,8 +3,8 @@ package com.opss.movibus.ui.adapter;
 import java.util.List;
 
 import android.content.Context;
-import android.support.design.widget.Snackbar;
-import android.support.v7.widget.RecyclerView;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +17,8 @@ import java.util.Collections;
 import com.opss.movibus.R;
 import com.opss.movibus.firebase.Firebase;
 import com.opss.movibus.model.LinhaFavorita;
-import com.opss.movibus.ui.activity.FavoritosActivity;
 import com.opss.movibus.ui.activity.LinhasFavoritasActivity;
 import com.opss.movibus.ui.fragment.MapsFragment;
-import com.opss.movibus.ui.fragment.marker.MarkerObjetct;
 import com.opss.movibus.ui.helper.ItemTouchHelperAdapter;
 
 

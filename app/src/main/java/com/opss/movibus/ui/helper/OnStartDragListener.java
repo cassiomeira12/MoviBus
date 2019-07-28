@@ -1,6 +1,6 @@
 package com.opss.movibus.ui.helper;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by cassio on 07/04/18.
