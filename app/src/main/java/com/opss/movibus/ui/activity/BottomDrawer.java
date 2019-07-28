@@ -279,6 +279,11 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
         this.activity.getMapsFragment().acompanharOnibus(onibus);
     }
 
+    public void verItinerario() {
+        this.activity.getMapsFragment().verItinerario(onibus);
+        this.closeAnimate();
+    }
+
     private void teste(String texto, String cor, Button button) {
 //        AsyncTask.execute(new Runnable() {
 //            @Override
@@ -288,11 +293,6 @@ public class BottomDrawer implements  View.OnClickListener, View.OnTouchListener
                 button.getBackground().mutate().setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC));
 //            }
 //        });
-    }
-
-    public void verItinerario() {
-        this.activity.getMapsFragment().verItinerario(onibus);
-        this.closeAnimate();
     }
 
     @Override

@@ -68,7 +68,7 @@ import static android.content.Context.LOCATION_SERVICE;
 public class MapsFragment extends SupportMapFragment implements OnMapReadyCallback, LocationListener,
         GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener {
 
-    public static final String TAG = "MapsFragment";
+    private static final String TAG = "MapsFragment";
 
     private MainActivity activity;
     private GoogleMap mMap;
@@ -286,8 +286,8 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
             onibusAcompanhando = onibusSelecionado.getMarker();
 
-            //appDrawer.abrir(onibusSelecionado, marker);
-            verItinerario(onibusSelecionado);
+            appDrawer.abrir(onibusSelecionado, marker);
+            //verItinerario(onibusSelecionado);
 
             LinhaFavorita linhaFavorita = COLLECTIONS.linhasFavoritas.get(onibusSelecionado.getIdLinha());
             if (linhaFavorita != null) {
@@ -377,6 +377,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         } else {
             onibusAcompanhando.getOnibus().setAcompanhando(false);
             onibusAcompanhando.setCamera(new NaoAcompanhar());
+            appDrawer.closeAnimate();
         }
 
     }
@@ -466,64 +467,6 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         PontoOnibus ponto = COLLECTIONS.pontoOnibus.get(idPonto);
         ponto.getMarker().getMarker().showInfoWindow();
         moveCamera(ponto.getMarker().getMarker().getPosition(), ZOOM_SELECT);
-    }
-
-    private void pontosDeOnibus() {
-
-        LatLng l1 = new LatLng(-14.887643, -40.802569);
-        LatLng l2 = new LatLng(-14.888117, -40.802987);
-        LatLng l3 = new LatLng(-14.888425, -40.803313);
-        LatLng l4 = new LatLng(-14.889932, -40.804553);
-        LatLng l5 = new LatLng(-14.891238, -40.805761);
-
-//        adicionarPontoMapa(l1);
-//        adicionarPontoMapa(l2);
-//        adicionarPontoMapa(l3);
-//        adicionarPontoMapa(l4);
-//        adicionarPontoMapa(l5);
-    }
-
-    private void adicionarOnibusMapa(LatLng latLng) {
-        String id = Firebase.get().getFireOnibus().generateKey();
-
-        Onibus onibus = new Onibus();
-        onibus.setId(id);
-        onibus.setIdLinha("i57qiNbMpjR6FH7WEakG");
-        onibus.setPosicao(latLng.latitude, latLng.longitude);
-
-        OnibusMarker onibusMarker = new OnibusMarker(onibus);
-        Marker marker = onibusMarker.getMarker(mMap);
-
-        Firebase.get().getFireOnibus().setDocument(onibus);
-    }
-
-    private void adicionarPontoMapa(LatLng latLng) {
-//        String id = dataBase.collection(PontoOnibus.COLECAO).document().getId();
-//
-//        PontoOnibus ponto = new PontoOnibus();
-//        ponto.setId(id);
-//        ponto.setPosicao(latLng.latitude, latLng.longitude);
-//
-//        PontoMarker pontoMarker = new PontoMarker(ponto);
-//        Marker marker = pontoMarker.getMarker(mMap);
-//        marker.setTag(ponto);
-//
-//        dataBase.collection(PontoOnibus.COLECAO).document(id).set(ponto);
-    }
-
-    private void adicionarLinha() {
-        String id = Firebase.get().getFireLinha().generateKey();
-
-        Linha linha = new Linha();
-        linha.setId(id);
-        linha.setNome("D36");
-        linha.setVia("Fainor");
-        linha.setOrigem("Conquista VI");
-        linha.setDestino("UESB");
-        linha.setIdRotaIda("GsvFy5FgzDjI6kRkzG6p");
-        linha.setIdRotaVolta("haeZjzAyDUzsdt08Wex0");
-
-        Firebase.get().getFireLinha().setDocument(linha);
     }
 
     public class CollectionFirebase implements Serializable {

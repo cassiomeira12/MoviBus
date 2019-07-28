@@ -35,8 +35,8 @@ public class OnibusMarker extends MarkerObjetct implements EventListener<Documen
 
     public OnibusMarker(Onibus onibus) {
         super(R.mipmap.ic_onibus);
-        LatLng posicao = new LatLng(onibus.getLatitude(), onibus.getLongitude());
-        super.markerOptions.position(posicao);
+        //LatLng posicao = new LatLng(onibus.getLatitude(), onibus.getLongitude());
+        super.markerOptions.position(new LatLng(0,0));
         this.onibus = onibus;
         if (onibus.getLinha() != null) {
             super.markerOptions.title(onibus.getLinha().getNome());
@@ -55,6 +55,7 @@ public class OnibusMarker extends MarkerObjetct implements EventListener<Documen
 
         this.marker.setPosition(localizacao);
         this.camera.camera(localizacao);
+        this.onibus.setPosicao(lat, lon);
     }
 
     @Override
