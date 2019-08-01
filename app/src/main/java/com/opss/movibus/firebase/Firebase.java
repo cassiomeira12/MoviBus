@@ -1,5 +1,7 @@
 package com.opss.movibus.firebase;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.opss.movibus.firebase.fire.*;
 import com.opss.movibus.model.*;
 
@@ -16,6 +18,10 @@ public class Firebase {
 
     public static Firebase get() {
         return instance;
+    }
+
+    public FirebaseUser getFireCurrentUser() {
+        return FirebaseAuth.getInstance().getCurrentUser();
     }
 
     public FireUsuario getFireUsuario() {

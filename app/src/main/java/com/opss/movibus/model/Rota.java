@@ -1,14 +1,10 @@
 package com.opss.movibus.model;
 
-import com.google.api.Service;
 import com.google.firebase.firestore.Exclude;
-import com.google.firebase.firestore.GeoPoint;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Rota implements Serializable {
     @Exclude
@@ -18,13 +14,12 @@ public class Rota implements Serializable {
     @Exclude
     public static final String PONTOS_ONIBUS = "pontosOnibus";
 
-    private String id;
+    private String id, origem, destino;
 
     @Exclude
     private List<Coordenada> coordenadas;
 
     public Rota() {
-        this.id = "";
         this.coordenadas = new ArrayList<>();
     }
 
@@ -41,6 +36,22 @@ public class Rota implements Serializable {
         this.id = id;
     }
 
+    public String getOrigem() {
+        return origem;
+    }
+
+    public void setOrigem(String origem) {
+        this.origem = origem;
+    }
+
+    public String getDestino() {
+        return destino;
+    }
+
+    public void setDestino(String destino) {
+        this.destino = destino;
+    }
+
     public List<Coordenada> getCoordenadas() {
         return coordenadas;
     }
@@ -48,27 +59,4 @@ public class Rota implements Serializable {
     public void setCoordenadas(List<Coordenada> coordenadas) {
         this.coordenadas = coordenadas;
     }
-
-//    public Map<String, PontoOnibus> getPontosOnibus() {
-//        return pontosOnibus;
-//    }
-//
-//    public void setPontosOnibus(Map<String, PontoOnibus> pontosOnibus) {
-//        this.pontosOnibus = pontosOnibus;
-//    }
-
-//    public void addPonto(PontoOnibus ponto) {
-//        this.pontosOnibus.put(ponto.getId(), ponto);
-//    }
-//
-//    public void addAllPonto(PontoOnibus... pontos) {
-//        for (PontoOnibus ponto : pontos) {
-//            this.pontosOnibus.put(ponto.getId(), ponto);
-//        }
-//    }
-
-//    public PontoOnibus getPonto(String key) {
-//        return this.pontosOnibus.get(key);
-//    }
-
 }

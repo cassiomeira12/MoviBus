@@ -12,13 +12,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-
-import javax.annotation.Nullable;
-
 import com.opss.movibus.R;
 import com.opss.movibus.location.camera.Camera;
 import com.opss.movibus.location.camera.NaoAcompanhar;
 import com.opss.movibus.model.Onibus;
+
+import javax.annotation.Nullable;
 
 public class OnibusMarker extends MarkerObjetct implements EventListener<DocumentSnapshot>, ValueEventListener {
 
@@ -27,6 +26,8 @@ public class OnibusMarker extends MarkerObjetct implements EventListener<Documen
     private Onibus onibus;//Referencia ao objeto Ponto de Onibus
 
     private Camera camera = new NaoAcompanhar();
+
+    private LatLng lastLocation = null;
 
     public OnibusMarker() {
         super(R.mipmap.ic_onibus);
@@ -48,14 +49,19 @@ public class OnibusMarker extends MarkerObjetct implements EventListener<Documen
 
     @Override
     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-        double lat = dataSnapshot.child("latitude").getValue(Double.class);
-        double lon = dataSnapshot.child("longitude").getValue(Double.class);
+        if (dataSnapshot.exists()) {
+            if (dataSnapshot.child("latitude").exists() && dataSnapshot.child("longitude").exists()) {
+                double lat = dataSnapshot.child("latitude").getValue(Double.class);
+                double lon = dataSnapshot.child("longitude").getValue(Double.class);
 
-        LatLng localizacao = new LatLng(lat, lon);
+                LatLng location = new LatLng(lat, lon);
 
-        this.marker.setPosition(localizacao);
-        this.camera.camera(localizacao);
-        this.onibus.setPosicao(lat, lon);
+                this.marker.setPosition(location);
+                this.camera.camera(location);
+                this.onibus.setPosicao(lat, lon);
+                this.lastLocation = location;
+            }
+        }
     }
 
     @Override
