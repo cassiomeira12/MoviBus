@@ -17,8 +17,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -195,28 +199,99 @@ public class ConfiguracoesContaActivity extends AppCompatActivity implements Con
         vh.btnSalvar.setEnabled(false);
         vh.btnCancelar.setEnabled(false);
 
-        usuario.setNome(vh.edtNome.getText().toString());
-        usuario.setTelefone(vh.edtTelefone.getText().toString());
-        usuario.setEmail(vh.edtEmail.getText().toString());
+        if (vh.linearTrocarSenha.getVisibility() == View.VISIBLE) {
 
-        if (vh.linearTrocarSenha.getVisibility() == View.VISIBLE)
-            usuario.setSenha(vh.edtNovaSenha.getText().toString());
+            String senhaAtual = vh.edtSenha.getText().toString();
+            AuthCredential credential = EmailAuthProvider.getCredential(usuario.getEmail(), senhaAtual);
+            Firebase.get().getFireCurrentUser().reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        usuario.setNome(vh.edtNome.getText().toString());
+                        usuario.setTelefone(vh.edtTelefone.getText().toString());
+                        //usuario.setEmail(vh.edtEmail.getText().toString());
 
-        Firebase.get().getFireUsuario().getCollection().document(usuario.getId()).set(usuario).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Toast.makeText(getApplicationContext(), R.string.dados_atualizados, Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(getApplicationContext(), R.string.ocorreu_um_erro, Toast.LENGTH_SHORT).show();
-                vh.progressBar.setVisibility(View.GONE);
-                vh.btnSalvar.setEnabled(true);
-                vh.btnCancelar.setEnabled(true);
-            }
-        });
+                        Firebase.get().getFireCurrentUser().updatePassword(vh.edtNovaSenha.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Firebase.get().getFireUsuario().getCollection().document(usuario.getId()).set(usuario).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            Toast.makeText(getApplicationContext(), R.string.dados_atualizados, Toast.LENGTH_SHORT).show();
+                                            finish();
+                                        }
+                                    });
+                                } else {
+                                    Toast.makeText(getApplicationContext(), R.string.ocorreu_um_erro, Toast.LENGTH_LONG).show();
+                                    vh.progressBar.setVisibility(View.GONE);
+                                    vh.btnSalvar.setEnabled(true);
+                                    vh.btnCancelar.setEnabled(true);
+                                }
+                            }
+                        });
+
+//                        Firebase.get().getFireUsuario().getCollection().document(usuario.getId()).set(usuario).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                            @Override
+//                            public void onSuccess(Void aVoid) {
+//                                Toast.makeText(getApplicationContext(), R.string.dados_atualizados, Toast.LENGTH_SHORT).show();
+//                                finish();
+//                            }
+//                        }).addOnFailureListener(new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception e) {
+//                                Toast.makeText(getApplicationContext(), R.string.ocorreu_um_erro, Toast.LENGTH_SHORT).show();
+//                                vh.progressBar.setVisibility(View.GONE);
+//                                vh.btnSalvar.setEnabled(true);
+//                                vh.btnCancelar.setEnabled(true);
+//                            }
+//                        });
+
+                    } else {
+                        vh.edtSenha.setError(getString(R.string.senha_incorreta));
+                        Toast.makeText(getApplicationContext(), R.string.senha_incorreta, Toast.LENGTH_LONG).show();
+                        vh.progressBar.setVisibility(View.GONE);
+                        vh.btnSalvar.setEnabled(true);
+                        vh.btnCancelar.setEnabled(true);
+                    }
+                }
+            });
+
+
+        } else {
+            usuario.setNome(vh.edtNome.getText().toString());
+            usuario.setTelefone(vh.edtTelefone.getText().toString());
+            usuario.setEmail(vh.edtEmail.getText().toString());
+
+            Firebase.get().getFireUsuario().getCollection().document(usuario.getId()).set(usuario).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Toast.makeText(getApplicationContext(), R.string.dados_atualizados, Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getApplicationContext(), R.string.ocorreu_um_erro, Toast.LENGTH_SHORT).show();
+                    vh.progressBar.setVisibility(View.GONE);
+                    vh.btnSalvar.setEnabled(true);
+                    vh.btnCancelar.setEnabled(true);
+                }
+            });
+        }
+
+//        vh.progressBar.setVisibility(View.VISIBLE);
+//        vh.btnSalvar.setEnabled(false);
+//        vh.btnCancelar.setEnabled(false);
+
+//        usuario.setNome(vh.edtNome.getText().toString());
+//        usuario.setTelefone(vh.edtTelefone.getText().toString());
+//        usuario.setEmail(vh.edtEmail.getText().toString());
+//
+//        if (vh.linearTrocarSenha.getVisibility() == View.VISIBLE)
+            //usuario.setSenha(vh.edtNovaSenha.getText().toString());
+
+        //Firebase.get().getFireCurrentUser().updatePassword("").
     }
 
     private boolean validarCampos() {
@@ -241,9 +316,10 @@ public class ConfiguracoesContaActivity extends AppCompatActivity implements Con
 
 
         if (vh.linearTrocarSenha.getVisibility() == View.VISIBLE) {
-            if (!vh.edtSenha.getText().toString().equals(usuario.getSenha())) {
-                vh.edtSenha.setError(getString(R.string.senha_incorreta));
+
+            if (vh.edtSenha.getText().toString().trim().length() < 4) {
                 valido = false;
+                vh.edtSenha.setError(getString(R.string.senha_invalida));
             }
 
             if (vh.edtNovaSenha.getText().toString().trim().length() < 4) {
@@ -252,6 +328,11 @@ public class ConfiguracoesContaActivity extends AppCompatActivity implements Con
             }
 
             if (vh.edtConfirmarSenha.getText().toString().trim().length() < 4) {
+                valido = false;
+                vh.edtConfirmarSenha.setError(getString(R.string.senha_nao_confere));
+            }
+
+            if (!vh.edtNovaSenha.getText().toString().equals(vh.edtConfirmarSenha.getText().toString())) {
                 valido = false;
                 vh.edtConfirmarSenha.setError(getString(R.string.senha_nao_confere));
             }

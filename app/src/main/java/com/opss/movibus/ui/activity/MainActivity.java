@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onSupportNavigateUp() {
 
         if (vh.toolbarPesquisa.getVisibility() == View.GONE) {
-            vh.drawerLayout.openDrawer(Gravity.START);
+            vh.drawerLayout.openDrawer(GravityCompat.START);
             return false;
         }
 

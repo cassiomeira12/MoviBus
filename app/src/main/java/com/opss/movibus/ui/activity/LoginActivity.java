@@ -140,32 +140,36 @@ public class LoginActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     FirebaseUser user = Firebase.get().getFireUsuario().getFireAuth().getCurrentUser();
                     //Verificando se já existe uma conta da google cadastrada
-                    Firebase.get().getFireUsuario().getCollection().document(user.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    Firebase.get().getFireUsuario().getCollection().document(user.getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            if (documentSnapshot.exists()) {
-                                Usuario usuario = documentSnapshot.toObject(Usuario.class);
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                intent.putExtra("USUARIO_LOGADO", usuario);
-                                startActivity(intent);
-                                dialog.dismiss();
-                                finish();
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                if (task.getResult().exists()) {
+                                    Usuario usuario = task.getResult().toObject(Usuario.class);
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    intent.putExtra("USUARIO_LOGADO", usuario);
+                                    startActivity(intent);
+                                    dialog.dismiss();
+                                    finish();
+                                } else {
+                                    //Cadastrando a nova Conta
+                                    String nome = user.getDisplayName();
+                                    String email = user.getEmail();
+                                    String telefone = null;
+
+                                    //Criando objeto do Usuario
+                                    Usuario usuario = new Usuario();
+                                    usuario.setId(user.getUid());
+                                    usuario.setNome(nome);
+                                    usuario.setEmail(email);
+                                    usuario.setTelefone(telefone);
+
+                                    cadastrarObjetoUsuario(usuario, dialog);
+                                }
                             } else {
-                                //Cadastrando a nova Conta
-                                String nome = user.getDisplayName();
-                                String email = user.getEmail();
-                                String senha = "";
-                                String telefone = "";
-
-                                //Criando objeto do Usuario
-                                Usuario usuario = new Usuario();
-                                usuario.setId(user.getUid());
-                                usuario.setNome(nome);
-                                usuario.setEmail(email);
-                                usuario.setSenha(senha);
-                                usuario.setTelefone(telefone);
-
-                                cadastrarObjetoUsuario(usuario, dialog);
+                                task.getException().printStackTrace();
+                                dialog.dismiss();
+                                Snackbar.make(getCurrentFocus(), "Erro ao efetuar o login", Snackbar.LENGTH_LONG).show();
                             }
                         }
                     });
@@ -186,6 +190,8 @@ public class LoginActivity extends AppCompatActivity {
         Firebase.get().getFireUsuario().getCollection().document(usuario.getId()).set(usuario).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
+                //Email de nova Conta
+                Firebase.get().getFireCurrentUser().sendEmailVerification();
                 dialog.dismiss();
                 Snackbar.make(getCurrentFocus(), "Usuário cadastrado com sucesso!", Snackbar.LENGTH_LONG).show();
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);

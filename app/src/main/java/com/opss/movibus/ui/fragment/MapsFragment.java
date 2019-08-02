@@ -18,6 +18,7 @@ import androidx.core.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -87,6 +88,7 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
 
     public static CollectionFirebase COLLECTIONS;
     private OnibusMarker onibusAcompanhando = null;
+    private Polyline polylineItinerario = null;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -390,48 +392,65 @@ public class MapsFragment extends SupportMapFragment implements OnMapReadyCallba
         Firebase.get().getFireRota().getCollectionCoordenadas(onibus.getLinha().getIdRotaIda()).orderBy("numero", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                List<Coordenada> teste = queryDocumentSnapshots.toObjects(Coordenada.class);
+                Log.i(TAG, "Itinerario Rota IDA ");
+                if (e == null) {
+                    List<Coordenada> coordenadaList = queryDocumentSnapshots.toObjects(Coordenada.class);
+                    if (coordenadaList.isEmpty()) {
+                        Toast.makeText(getContext(), "Essa linha não possui um itinerário cadastrado", Toast.LENGTH_LONG).show();
+                    } else {
+                        List<LatLng> decodedPath = new ArrayList<>();
 
-                List<LatLng> decodedPath = new ArrayList<>();
+                        Rota rota = new Rota();
+                        rota.setCoordenadas(coordenadaList);
+                        onibus.getLinha().setRotaIDA(rota);
 
-                Rota rota = new Rota();
-                rota.setCoordenadas(teste);
-                onibus.getLinha().setRotaIDA(rota);
+                        for (Coordenada co : coordenadaList) {
+                            decodedPath.add(new LatLng(co.latitude, co.longitude));
+                        }
 
-                for (Coordenada co : teste) {
-                    decodedPath.add(new LatLng(co.latitude, co.longitude));
+                        Polyline poly = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.GREEN));
+                        //poly.remove();
+                    }
+                } else {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                 }
-
-                Polyline poly = mMap.addPolyline(new PolylineOptions().addAll(decodedPath).color(Color.GREEN));
-                //poly.remove();
             }
         });
 
         Firebase.get().getFireRota().getCollectionCoordenadas(onibus.getLinha().getIdRotaVolta()).orderBy("numero", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                List<Coordenada> teste = queryDocumentSnapshots.toObjects(Coordenada.class);
+                Log.i(TAG, "Itinerario Rota Volta ");
+                if (e == null) {
+                    List<Coordenada> coordenadaList = queryDocumentSnapshots.toObjects(Coordenada.class);
+                    if (coordenadaList.isEmpty()) {
+                        Toast.makeText(getContext(), "Essa linha não possui um itinerário cadastrado", Toast.LENGTH_LONG).show();
+                    } else {
+                        List<LatLng> decodedPath = new ArrayList<>();
 
-                List<LatLng> decodedPath = new ArrayList<>();
+                        Rota rota = new Rota();
+                        rota.setCoordenadas(coordenadaList);
+                        onibus.getLinha().setRotaVolta(rota);
 
-                Rota rota = new Rota();
-                rota.setCoordenadas(teste);
-                onibus.getLinha().setRotaVolta(rota);
+                        for (Coordenada co : coordenadaList) {
+                            decodedPath.add(new LatLng(co.latitude, co.longitude));
+                        }
 
-                for (Coordenada co : teste) {
-                    decodedPath.add(new LatLng(co.latitude, co.longitude));
+                        PolylineOptions polyOptions = new PolylineOptions();
+                        polyOptions.color(Color.BLUE);
+                        polyOptions.width(5);
+                        polyOptions.startCap(new SquareCap());
+                        polyOptions.endCap(new SquareCap());
+                        polyOptions.jointType(JointType.ROUND);
+                        polyOptions.addAll(decodedPath);
+
+                        //Polyline poly = mMap.addPolyline(polyOptions);
+                        polylineItinerario = mMap.addPolyline(polyOptions);
+                        //poly.remove();
+                    }
+                } else {
+                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                 }
-
-                PolylineOptions polyOptions = new PolylineOptions();
-                polyOptions.color(Color.BLUE);
-                polyOptions.width(5);
-                polyOptions.startCap(new SquareCap());
-                polyOptions.endCap(new SquareCap());
-                polyOptions.jointType(JointType.ROUND);
-                polyOptions.addAll(decodedPath);
-
-                Polyline poly = mMap.addPolyline(polyOptions);
-                //poly.remove();
             }
         });
 

@@ -46,7 +46,7 @@ public class CadastroActivity extends AppCompatActivity {
 
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("30153669459-59h39023tinom0ilp8t23dq0oovg4jld.apps.googleusercontent.com")
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -62,6 +62,7 @@ public class CadastroActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
+                e.printStackTrace();
                 Snackbar.make(getCurrentFocus(), "Erro, " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
             }
         }
@@ -94,7 +95,6 @@ public class CadastroActivity extends AppCompatActivity {
                                 //Cadastrando a nova Conta
                                 String nome = user.getDisplayName();
                                 String email = user.getEmail();
-                                String senha = "";
                                 String telefone = "";
 
                                 //Criando objeto do Usuario
@@ -102,7 +102,6 @@ public class CadastroActivity extends AppCompatActivity {
                                 usuario.setId(user.getUid());
                                 usuario.setNome(nome);
                                 usuario.setEmail(email);
-                                usuario.setSenha(senha);
                                 usuario.setTelefone(telefone);
 
                                 cadastrarObjetoUsuario(usuario, dialog);
@@ -164,7 +163,6 @@ public class CadastroActivity extends AppCompatActivity {
             return;
         }
 
-
         viewHolder.setEnable(false);
 
         String nome = viewHolder.edtNome.getText().toString();
@@ -183,7 +181,6 @@ public class CadastroActivity extends AppCompatActivity {
                 usuario.setId(authResult.getUser().getUid());
                 usuario.setNome(nome);
                 usuario.setEmail(email);
-                usuario.setSenha(senha);
                 usuario.setTelefone(telefone);
 
                 cadastrarObjetoUsuario(usuario, dialog);
@@ -202,6 +199,8 @@ public class CadastroActivity extends AppCompatActivity {
         Firebase.get().getFireUsuario().getCollection().document(usuario.getId()).set(usuario).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
+                //Email de nova Conta
+                Firebase.get().getFireCurrentUser().sendEmailVerification();
                 dialog.dismiss();
                 Snackbar.make(getCurrentFocus(), "Usuário cadastrado com sucesso!", Snackbar.LENGTH_LONG).show();
                 startActivity(new Intent(CadastroActivity.this, MainActivity.class));
