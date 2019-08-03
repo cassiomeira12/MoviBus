@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric' //Crashlytics
 
 android {
     compileSdkVersion 28
@@ -41,11 +42,12 @@ dependencies {
     //Firebase
     implementation 'com.google.firebase:firebase-core:17.0.1'//Firebase
     implementation 'com.google.firebase:firebase-auth:18.1.0'//Authentication
-    implementation 'com.google.android.gms:play-services-auth:16.0.1'//Authentication
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'//Authentication
     implementation 'com.google.firebase:firebase-firestore:20.2.0'//Firestore Database
     implementation 'com.google.firebase:firebase-database:18.0.1'//Realtime Database
     implementation 'com.firebase:geofire-android:2.1.2'//Biblioteca para Geo Localizacao
     implementation 'com.google.firebase:firebase-messaging:19.0.1'//Firebase Cloud Messaging
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'//Crashlytics
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
     //Program type already present: android.arch.core.util.Function

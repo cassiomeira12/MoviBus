@@ -1,0 +1,130 @@
+{
+  "project_info": {
+    "project_number": "848105530845",
+    "firebase_url": "https://opss-movibus.firebaseio.com",
+    "project_id": "opss-movibus",
+    "storage_bucket": "opss-movibus.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848105530845:android:38b3f15dab0e6594",
+        "android_client_info": {
+          "package_name": "com.opss.movibus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848105530845-2dfc5alk2vih483t9kes333sdfv7tmpn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.opss.movibus",
+            "certificate_hash": "6569113ba1c4778da5283005df08f4fac5b0c37c"
+          }
+        },
+        {
+          "client_id": "848105530845-n16lcamnvq758fa1lbmkumli4udo0nlu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.opss.movibus",
+            "certificate_hash": "311447b053d814caf463a2a048e9eb6c2b3b9513"
+          }
+        },
+        {
+          "client_id": "848105530845-ip83u55629dtiemr352vgifp2hmaub27.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyeALTtz10dz5rrLgr6vRthTHJH7uoTbY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "848105530845-ip83u55629dtiemr352vgifp2hmaub27.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848105530845:android:1bc7e93213e2b227",
+        "android_client_info": {
+          "package_name": "com.opss.pegaponto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848105530845-3i2tbk5tu63ss3704skp5g5m9qdnm5k2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.opss.pegaponto",
+            "certificate_hash": "6569113ba1c4778da5283005df08f4fac5b0c37c"
+          }
+        },
+        {
+          "client_id": "848105530845-ip83u55629dtiemr352vgifp2hmaub27.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyeALTtz10dz5rrLgr6vRthTHJH7uoTbY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "848105530845-ip83u55629dtiemr352vgifp2hmaub27.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:848105530845:android:e1fc0eeae6c32b3f",
+        "android_client_info": {
+          "package_name": "com.opss.tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "848105530845-jto38jomhvu6lrrirdqbl44l1mqrukl1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.opss.tracker",
+            "certificate_hash": "6569113ba1c4778da5283005df08f4fac5b0c37c"
+          }
+        },
+        {
+          "client_id": "848105530845-ip83u55629dtiemr352vgifp2hmaub27.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyeALTtz10dz5rrLgr6vRthTHJH7uoTbY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "848105530845-ip83u55629dtiemr352vgifp2hmaub27.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
